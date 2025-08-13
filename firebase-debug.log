@@ -1,0 +1,71 @@
+[debug] [2025-08-08T07:15:29.995Z] ----------------------------------------------------------------------
+[debug] [2025-08-08T07:15:29.998Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\msu-wone\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2025-08-08T07:15:29.998Z] CLI Version:   14.10.1
+[debug] [2025-08-08T07:15:29.998Z] Platform:      win32
+[debug] [2025-08-08T07:15:29.999Z] Node Version:  v22.16.0
+[debug] [2025-08-08T07:15:29.999Z] Time:          Fri Aug 08 2025 15:15:29 GMT+0800 (Singapore Standard Time)
+[debug] [2025-08-08T07:15:29.999Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-08-08T07:15:30.002Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2025-08-08T07:15:30.281Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-08-08T07:15:30.281Z] > authorizing via signed-in user (mudag.mohammadnor@s.msumain.edu.ph)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Users\msu-wone\Downloads\occupeye-systems
+
+Before we get started, keep in mind:
+
+  * You are initializing within an existing Firebase project directory
+
+[debug] [2025-08-08T07:15:30.872Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2025-08-08T07:15:30.873Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2025-08-08T07:15:54.667Z] Using project from CLI flag: occupeye-system
+[debug] [2025-08-08T07:15:54.668Z] Checked if tokens are valid: false, expires at: 1752225539629
+[debug] [2025-08-08T07:15:54.668Z] Checked if tokens are valid: false, expires at: 1752225539629
+[debug] [2025-08-08T07:15:54.669Z] > refreshing access token with scopes: []
+[debug] [2025-08-08T07:15:54.670Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-08-08T07:15:54.670Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-08-08T07:15:56.215Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-08-08T07:15:56.215Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-08-08T07:15:56.245Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/occupeye-system [none]
+[debug] [2025-08-08T07:15:57.093Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/occupeye-system 200
+[debug] [2025-08-08T07:15:57.093Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/occupeye-system {"projectId":"occupeye-system","projectNumber":"841301770831","displayName":"occupeye","name":"projects/occupeye-system","resources":{"hostingSite":"occupeye-system"},"state":"ACTIVE","etag":"1_68981aa2-5bf5-4e32-84ce-e1aead4911aa"}
+[info] i  Using project occupeye-system (occupeye) 
+[info] 
+=== Hosting Setup
+[debug] [2025-08-08T07:15:57.113Z] Checked if tokens are valid: true, expires at: 1754640955216
+[debug] [2025-08-08T07:15:57.113Z] Checked if tokens are valid: true, expires at: 1754640955216
+[debug] [2025-08-08T07:15:57.113Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/occupeye-system [none]
+[debug] [2025-08-08T07:15:57.450Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/occupeye-system 200
+[debug] [2025-08-08T07:15:57.451Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/occupeye-system {"projectId":"occupeye-system","projectNumber":"841301770831","displayName":"occupeye","name":"projects/occupeye-system","resources":{"hostingSite":"occupeye-system"},"state":"ACTIVE","etag":"1_68981aa2-5bf5-4e32-84ce-e1aead4911aa"}
+[info] 
+[info] Your public directory is the folder (relative to your project directory) that
+[info] will contain Hosting assets to be uploaded with firebase deploy. If you
+[info] have a build process for your assets, use your build's output directory.
+[info] 
+[debug] [2025-08-08T07:16:09.324Z] >>> [apiv2][query] GET https://www.gstatic.com/firebasejs/releases.json [none]
+[debug] [2025-08-08T07:16:11.550Z] <<< [apiv2][status] GET https://www.gstatic.com/firebasejs/releases.json 200
+[debug] [2025-08-08T07:16:11.550Z] <<< [apiv2][body] GET https://www.gstatic.com/firebasejs/releases.json {"current":{"version":"12.1.0","browserURL":"https://www.gstatic.com/firebasejs/12.1.0/firebase.js","packageURL":"https://www.gstatic.com/firebasejs/12.1.0/firebase.tgz"},"live":{"version":"12.1","browserURL":"https://www.gstatic.com/firebasejs/live/12.1/firebase.js","packageURL":"https://www.gstatic.com/firebasejs/live/12.1/firebase.tgz"},"components":{"ai":"https://www.gstatic.com/firebasejs/12.1.0/firebase-ai.js","analytics":"https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js","app":"https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js","app-check":"https://www.gstatic.com/firebasejs/12.1.0/firebase-app-check.js","auth":"https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js","auth/cordova":"https://www.gstatic.com/firebasejs/12.1.0/firebase-auth/cordova.js","auth/web-extension":"https://www.gstatic.com/firebasejs/12.1.0/firebase-auth/web-extension.js","functions":"https://www.gstatic.com/firebasejs/12.1.0/firebase-functions.js","firestore":"https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js","firestore/lite":"https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore/lite.js","installations":"https://www.gstatic.com/firebasejs/12.1.0/firebase-installations.js","storage":"https://www.gstatic.com/firebasejs/12.1.0/firebase-storage.js","performance":"https://www.gstatic.com/firebasejs/12.1.0/firebase-performance.js","remote-config":"https://www.gstatic.com/firebasejs/12.1.0/firebase-remote-config.js","messaging":"https://www.gstatic.com/firebasejs/12.1.0/firebase-messaging.js","messaging/sw":"https://www.gstatic.com/firebasejs/12.1.0/firebase-messaging/sw.js","database":"https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js","data-connect":"https://www.gstatic.com/firebasejs/12.1.0/firebase-data-connect.js","firestore.memory":"https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.memory.js"}}
+[info] +  Wrote public/index.html 
+[info] 
+[info] i  Didn't detect a .git folder. Assuming C:\Users\msu-wone\Downloads\occupeye-systems is the project root. 
+[info] i  Authorizing with GitHub to upload your service account to a GitHub repository's secrets store. 
+[info] 
+[info] Visit this URL on this device to log in:
+[info] https://github.com/login/oauth/authorize?client_id=89cf50f02ac6aaed3484&state=603040196&redirect_uri=http%3A%2F%2Flocalhost%3A9005&scope=read%3Auser%20repo%20public_repo
+[info] 
+[info] Waiting for authentication...

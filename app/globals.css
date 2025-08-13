@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 39 30% 97%;
+    --foreground: 0 0% 0%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+
+    --primary: 357 60% 30%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 50 100% 50%;
+    --secondary-foreground: 0 0% 0%;
+
+    --muted: 39 20% 90%;
+    --muted-foreground: 0 0% 40%;
+
+    --accent: 50 100% 50%;
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 16 100% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 39 20% 85%;
+    --input: 39 20% 85%;
+    --ring: 357 60% 30%;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Custom badge styles */
+  .badge-success {
+    @apply bg-success text-white;
+  }
+
+  .badge-warning {
+    @apply bg-warning text-white;
+  }
+
+  .badge-primary {
+    @apply bg-primary text-white;
+  }
+
+  .badge-secondary {
+    @apply bg-secondary text-black;
+  }
+
+  /* Custom button hover states */
+  .btn-primary:hover {
+    @apply bg-primary-600;
+  }
+
+  .btn-secondary:hover {
+    @apply bg-secondary-600;
+  }
+
+  .btn-success:hover {
+    @apply bg-success-600;
+  }
+}
