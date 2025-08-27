@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CreditCard, Scan, DoorOpen, Search, User, Clock, Calendar, Building, RefreshCw } from "lucide-react";
+import { CreditCard, Scan, DoorOpen, Search, User, Clock, Calendar, Building, RefreshCw, Activity, LogIn, LogOut, MapPin, Shield, Phone } from "lucide-react";
 import Navigation from "@/components/navigation";
 import { getRfidLogs, RfidLog, getDormById } from "@/app/utils/admin-firestore";
 import { useAuth } from "@/lib/AuthContext";
@@ -236,6 +236,7 @@ export default function ManagerRfidLogs() {
           rfidValue: rfidValue.trim(),
           roomId: roomId.trim() || undefined,
           userId: userId.trim() || undefined, // Include user ID in the request
+      
         }),
       });
       
@@ -307,330 +308,143 @@ export default function ManagerRfidLogs() {
     const initials = log.studentName ? `${log.studentName.split(' ')[0][0] || ''}${log.studentName.split(' ')[1]?.[0] || ''}` : 'NA';
     
     return (
-      <Card className={`border-secondary/20 overflow-hidden transition-all hover:shadow-md ${isLarge ? 'col-span-full' : ''}`}>
-        <CardContent className={`p-4 ${isLarge ? 'md:p-6' : ''}`}>
-          <div className={`flex flex-col ${isLarge ? 'md:flex-row' : ''} gap-4`}>
-            <div className={`flex items-center ${isLarge ? 'md:w-1/4' : ''} gap-4`}>
-              <Avatar className={`${isLarge ? 'h-16 w-16' : 'h-12 w-12'} border-2 border-secondary`}>
-                <AvatarImage 
-                  src={"/placeholder-user.jpg"} 
-                  alt={log.studentName} 
-                />
-                <AvatarFallback className={`bg-secondary text-black ${isLarge ? 'text-lg' : 'text-sm'} font-bold`}>
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
+    <Card
+        key={log.id}
+        className={`border-2 hover:shadow-xl transition-all duration-300 ${
+          isLarge ? "border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10" : "hover:border-primary/20"
+        }`}
+      >
+        <CardHeader className={`pb-4 ${isLarge ? "pb-6" : ""}`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div
+                className={`${isLarge ? "h-16 w-16" : "h-12 w-12"} bg-primary/10 rounded-full flex items-center justify-center`}
+              >
+                <User className={`${isLarge ? "h-8 w-8" : "h-6 w-6"} text-primary`} />
+              </div>
               <div>
-                <div className={`font-medium ${isLarge ? 'text-lg' : ''}`}>{log.studentName}</div>
-                <div className="text-sm text-gray-500">{log.studentId}</div>
-               
+                <CardTitle className={`${isLarge ? "text-2xl" : "text-lg"}`}>{log.studentName}</CardTitle>
+                <CardDescription className={`${isLarge ? "text-base" : "text-sm"}`}>
+                  <div className="flex items-center gap-2">
+                  {log.studentId} | <Phone/>{log.contactNumber}
+                  </div>
+                  </CardDescription>
               </div>
             </div>
-            
-            <div className={`flex flex-wrap gap-4 ${isLarge ? 'md:flex-1' : ''}`}>
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500">Action</span>
-                <Badge className={`mt-1 ${
-                  log.action === 'entry'
-                    ? 'bg-green-500'
-                    : log.action === 'exit'
-                      ? 'bg-red-500'
-                      : 'bg-destructive'
-                }`}>
-                  {log.action === 'entry' ? 'Entry' : log.action === 'exit' ? 'Exit' : log.action}
-                </Badge>
-              </div>
-              
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500">Room</span>
-                <div className="flex items-center gap-1 mt-1">
-                  <DoorOpen className="h-3 w-3 text-primary" />
-                  <span className="font-medium">{assignedRoom || 'Not assigned'}</span>
-                </div>
-              </div>
-              
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500">Building</span>
-                <div className="flex items-center gap-1 mt-1">
-                  <Building className="h-3 w-3 text-primary" />
-                  <span className="font-medium">{displayBuilding || 'Not assigned'}</span>
-                </div>
-              </div>
-              
-              {displayDormName && (
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">Dormitory</span>
-                  <div className="flex items-center gap-1 mt-1">
-                    <Building className="h-3 w-3 text-primary" />
-                    <span className="font-medium">{displayDormName}</span>
-                  </div>
-                </div>
+            <Badge
+              className={`${
+                log.action === "entry"
+                  ? "bg-green-500 hover:bg-green-600 text-white"
+                  : log.action === "exit"
+                    ? "bg-red-500 hover:bg-red-600 text-white"
+                    : "bg-destructive"
+              } ${isLarge ? "text-lg px-4 py-2" : "text-sm px-3 py-1"}`}
+            >
+              {log.action === "entry" ? (
+                <>
+                  <LogIn className={`${isLarge ? "h-5 w-5" : "h-4 w-4"} mr-1`} />
+                  Entry
+                </>
+              ) : log.action === "exit" ? (
+                <>
+                  <LogOut className={`${isLarge ? "h-5 w-5" : "h-4 w-4"} mr-1`} />
+                  Exit
+                </>
+              ) : (
+                log.action
               )}
-              
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500">Time</span>
-                <div className="flex items-center gap-1 mt-1">
-                  <Clock className="h-3 w-3 text-primary" />
-                  <span className="font-mono">{time}</span>
-                </div>
+            </Badge>
+          </div>
+        </CardHeader>
+
+        <CardContent className={`space-y-${isLarge ? "6" : "4"}`}>
+          <div className={`grid grid-cols-2 gap-${isLarge ? "6" : "4"}`}>
+            <div className="flex items-center gap-3">
+              <MapPin className={`${isLarge ? "h-6 w-6" : "h-4 w-4"} text-muted-foreground`} />
+              <div>
+                <p className={`${isLarge ? "text-base" : "text-sm"} font-medium`}>Room</p>
+                <p className={`${isLarge ? "text-base" : "text-sm"} text-muted-foreground`}>
+                  {assignedRoom || "Not assigned"}
+                </p>
               </div>
-              
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-500">Date</span>
-                <div className="flex items-center gap-1 mt-1">
-                  <Calendar className="h-3 w-3 text-primary" />
-                  <span className="font-mono">{date}</span>
-                </div>
-              </div>
-              
-              {log.action === 'exit' && (
-                <div className="flex flex-col">
-                  <span className="text-xs text-gray-500">Duration</span>
-                  <div className="flex items-center gap-1 mt-1">
-                    <Clock className="h-3 w-3 text-primary" />
-                    <span className="font-mono">{log.duration}</span>
-                  </div>
-                </div>
-              )}
             </div>
+
+            <div className="flex items-center gap-3">
+              <Shield className={`${isLarge ? "h-6 w-6" : "h-4 w-4"} text-muted-foreground`} />
+              <div>
+                <p className={`${isLarge ? "text-base" : "text-sm"} font-medium`}>Building</p>
+                <p className={`${isLarge ? "text-base" : "text-sm"} text-muted-foreground`}>
+                  {assignedBuilding || "Not assigned"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className={`grid grid-cols-2 gap-${isLarge ? "6" : "4"} pt-${isLarge ? "4" : "2"} border-t`}>
+            <div className="flex items-center gap-3">
+              <Clock className={`${isLarge ? "h-6 w-6" : "h-4 w-4"} text-muted-foreground`} />
+              <div>
+                <p className={`${isLarge ? "text-base" : "text-sm"} font-medium`}>Time</p>
+                <p className={`font-mono ${isLarge ? "text-lg" : "text-sm"}`}>{time}</p>
+                <p className={`${isLarge ? "text-sm" : "text-xs"} text-muted-foreground`}>{date}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Activity className={`${isLarge ? "h-6 w-6" : "h-4 w-4"} text-muted-foreground`} />
+              <div>
+                <p className={`${isLarge ? "text-base" : "text-sm"} font-medium`}>Duration</p>
+                <p className={`${isLarge ? "text-2xl" : "text-lg"} font-bold text-primary`}>{log.duration}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className={`pt-${isLarge ? "4" : "2"} border-t`}>
+            <Badge variant="outline" className={`${isLarge ? "text-sm" : "text-xs"}`}>
+              Student Access
+            </Badge>
           </div>
         </CardContent>
       </Card>
     );
   };
 
+  
   return (
     <div className="min-h-screen bg-background">
       <Navigation userRole="manager" />
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-primary">RFID Access Logs</h1>
-          <p className="text-gray-600 mt-2">
-            {dormName ? `View RFID logs for ${dormName}` : "View RFID logs for your managed buildings"}
-          </p>
+      <main className="container mx-auto px-6 py-12">
+        <div className="mb-12 text-center">
+          <h1 className="text-6xl font-bold text-primary mb-4">RFID Access Logs</h1>
+          <p className="text-2xl text-muted-foreground">Real-time dormitory access monitoring system</p>
         </div>
 
-        {/* RFID Reader Card */}
-        <Card className="border-secondary/20 mb-8">
-          <CardHeader className="border-b border-secondary/20">
-            <CardTitle className="text-primary flex items-center">
-              <CreditCard className="h-5 w-5 mr-2" />
-              RFID Card Reader
-            </CardTitle>
-            <CardDescription>
-              Scan RFID cards to verify access and record entries
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <label className="text-sm font-medium">Automatic Detection</label>
-                    <Badge className={`${rfidReaderStatus !== 'idle' ? "bg-success" : "bg-muted"} text-white`}>
-                      {rfidReaderStatus === 'idle' ? 'OFF' : rfidReaderStatus === 'processing' ? 'Processing' : 'Listening'}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-500">
-                      {isListening ? "Enabled" : "Disabled"}
-                    </span>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={toggleListening}
-                      className="h-8"
-                    >
-                      {isListening ? "Disable" : "Enable"}
-                    </Button>
-                  </div>
-                </div>
-                
-                {isListening && currentBuffer.length > 0 && (
-                  <div className="bg-secondary/5 border border-secondary/20 rounded p-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Scan className="h-4 w-4 text-primary animate-pulse" />
-                        <span className="text-sm font-medium">Detecting input...</span>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={clearBuffer}
-                        className="h-6 px-2"
-                      >
-                        Clear
-                      </Button>
-                    </div>
-                    <div className="mt-1">
-                      <p className="text-xs font-mono bg-background/50 p-1 rounded overflow-x-auto whitespace-nowrap">
-                        {currentBuffer.length > 20 
-                          ? `${currentBuffer.substring(0, 8)}...${currentBuffer.substring(currentBuffer.length - 8)}`
-                          : currentBuffer}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">RFID Card Value</label>
-                  <div className="relative">
-                    <Scan className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                      placeholder={isListening ? "Scan card or enter value manually..." : "Enter RFID card value..."}
-                      className="pl-10 border-secondary/20"
-                      value={rfidValue}
-                      onChange={(e) => setRfidValue(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleRfidRead()}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Room ID (Optional)</label>
-                  <div className="relative">
-                    <DoorOpen className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                      placeholder="Enter room ID or name..."
-                      className="pl-10 border-secondary/20"
-                      value={roomId}
-                      onChange={(e) => setRoomId(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleRfidRead()}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">User ID (Optional)</label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                      placeholder="Enter user ID..."
-                      className="pl-10 border-secondary/20"
-                      value={userId}
-                      onChange={(e) => setUserId(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleRfidRead()}
-                    />
-                  </div>
-                </div>
-                <Button 
-                  className="w-full"
-                  onClick={handleRfidRead}
-                  disabled={rfidLoading}
-                >
-                  {rfidLoading ? (
-                    <>
-                      <div className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin mr-2"></div>
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <Scan className="h-4 w-4 mr-2" />
-                      {isListening ? "Scan or Read RFID Card" : "Read RFID Card"}
-                    </>
-                  )}
-                </Button>
-              </div>
-              <div className="bg-secondary/10 p-4 rounded-lg space-y-2">
-                <h3 className="font-semibold text-primary">RFID Reader Instructions</h3>
-                <ol className="space-y-2 text-sm text-gray-600 pl-5 list-decimal">
-                  <li>{isListening ? 
-                      <strong>Automatic Detection Enabled: Just scan your RFID card</strong> :
-                      "Enter the RFID card value from the scanner"}
-                  </li>
-                  <li>Optionally specify the room ID for the access point</li>
-                  <li>Optionally specify the user ID to include in logs</li>
-                  <li>{isListening ? 
-                      "The system will automatically process scanned cards" :
-                      "Click \"Read RFID Card\" or press Enter to process"}
-                  </li>
-                  <li>The system will verify the card and log the access attempt</li>
-                  <li>Results will appear in the logs below</li>
-                </ol>
-                <div className="text-xs text-gray-500 mt-4">
-                  {isListening ?
-                    <p>Auto-detection is active. The system is listening for card scanner input.</p> :
-                    <p>Auto-detection is disabled. Manual input required.</p>
-                  }
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-secondary/20">
-          <CardHeader className="border-b border-secondary/20">
+        <Card className="border-2 border-primary/20 shadow-xl">
+          <CardHeader className="border-b border-primary/20 bg-primary/5">
             <div className="flex justify-between items-center">
               <div>
-            <CardTitle className="text-primary">RFID Logs</CardTitle>
-            {dormName && (
-              <CardDescription>
-                Showing access logs for {dormName}
-              </CardDescription>
-            )}
+                <CardTitle className="text-3xl text-primary">RFID Access Logs</CardTitle>
+                <CardDescription className="text-lg mt-2">Showing access logs for managed buildings</CardDescription>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={fetchLogs}
-                disabled={loading}
-                className="flex items-center gap-1"
-              >
-                <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
-                <span>Refresh</span>
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-6">
-            {loading ? (
-              <div className="text-center py-8">
-                <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading logs...</p>
-              </div>
-            ) : logs.length === 0 ? (
-              <div className="text-center py-8 text-gray-600">
-                {dormName 
-                  ? `No logs found for ${dormName}.` 
-                  : "No logs found for your managed buildings."}
-                
-                {userData?.managedDormId && (
-                  <div className="mt-4 p-4 bg-secondary/5 rounded-md border border-secondary/20 max-w-md mx-auto">
-                    <h4 className="text-sm font-medium mb-2">Manager Dormitory Information</h4>
-                    <div className="text-xs space-y-1">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Managed Dorm ID:</span>
-                        <span className="font-mono">{userData.managedDormId}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Dormitory Name:</span>
-                        <span className="font-medium">{dormName || "Not found"}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Managed Buildings:</span>
-                        <span className="font-medium">{userData.managedBuildings?.join(", ") || "None"}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div>
-                <div className="flex flex-col md:flex-row gap-4 mb-6">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+
+              <div className="flex flex-col md:flex-row gap-6 mb-10">
+                                  <div className="flex-1 relative">
+                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400" />
                     <Input
                       placeholder="Search users, rooms..."
-                      className="pl-10 border-secondary/20"
+                      className="pl-14 h-16 text-xl border-2 border-primary/20"
                       value={searchTerm}
                       onChange={(e) => {
-                        setSearchTerm(e.target.value);
+                        setSearchTerm(e.target.value)
                         if (!e.target.value.trim()) {
-                          fetchLogs();
+                          fetchLogs()
                         }
                       }}
-                      onKeyDown={(e) => e.key === 'Enter' && handleLogSearch()}
+                      onKeyDown={(e) => e.key === "Enter" && handleLogSearch()}
                     />
                   </div>
                   <Select value={actionFilter} onValueChange={setActionFilter}>
-                    <SelectTrigger className="w-full md:w-[180px] border-secondary/20">
+                    <SelectTrigger className="w-full md:w-[220px] h-16 text-xl border-2 border-primary/20">
                       <SelectValue placeholder="All Actions" />
                     </SelectTrigger>
                     <SelectContent>
@@ -639,31 +453,60 @@ export default function ManagerRfidLogs() {
                       <SelectItem value="exit">Exit Only</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select value={roomFilter} onValueChange={setRoomFilter}>
-                    <SelectTrigger className="w-full md:w-[180px] border-secondary/20">
-                      <SelectValue placeholder="All Rooms" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Rooms</SelectItem>
-                      {getUniqueRooms().map(room => (
-                        <SelectItem key={room} value={room}>{room}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
                 
-                <div className="space-y-6">
-                  {/* Most recent log - large card */}
-                  {getFilteredLogs().length > 0 && renderLogCard(getFilteredLogs()[0], true)}
-                  
+            
+              
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={fetchLogs}
+                disabled={loading}
+                className="flex items-center gap-2 text-lg px-6 py-3 h-auto bg-transparent"
+              >
+                      
+                <RefreshCw className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
+                <span>Refresh</span>
+              </Button>
+                </div>
+            </div>
+          </CardHeader>
+
+          <CardContent className="pt-8">
+            {loading ? (
+              <div className="text-center py-20">
+                <div className="h-20 w-20 rounded-full border-6 border-primary border-t-transparent animate-spin mx-auto mb-8"></div>
+                <p className="text-2xl text-gray-600">Loading logs...</p>
+              </div>
+            ) : logs.length === 0 ? (
+              <div className="text-center py-20 text-gray-600">
+                <Activity className="h-24 w-24 text-gray-400 mx-auto mb-8" />
+                <h3 className="text-3xl font-semibold mb-4">No logs found</h3>
+                <p className="text-xl">No logs found for your managed buildings.</p>
+              </div>
+            ) : (
+              <div>
+   
+
+                <div className="space-y-8">
+                  {/* Most recent log - large featured card */}
+                  {getFilteredLogs().length > 0 && (
+                    <div className="mb-8">
+                      <h2 className="text-2xl font-semibold mb-4 text-primary">Latest Access</h2>
+                      {renderLogCard(getFilteredLogs()[0], true)}
+                    </div>
+                  )}
+
                   {/* Other logs - grid of smaller cards */}
                   {getFilteredLogs().length > 1 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {getFilteredLogs().slice(1, 7).map((log) => (
-                        <div key={log.id}>
-                          {renderLogCard(log)}
-                        </div>
-                      ))}
+                    <div>
+                      <h2 className="text-2xl font-semibold mb-6 text-primary">Recent Activity</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {getFilteredLogs()
+                          .slice(1, 7)
+                          .map((log) => (
+                            <div key={log.id}>{renderLogCard(log)}</div>
+                          ))}
+                      </div>
                     </div>
                   )}
                 </div>

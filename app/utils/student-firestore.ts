@@ -77,6 +77,7 @@ export const getDormitories = async (): Promise<Dormitory[]> => {
   }
 };
 
+
 // Get all rooms or filter by building
 export const getRooms = async (building?: string, status?: string): Promise<Room[]> => {
   try {
@@ -177,6 +178,8 @@ export const getReservationById = async (reservationId: string): Promise<Reserva
     return null;
   }
 };
+
+
 
 // Create new reservation
 export const createReservation = async (reservationData: Omit<Reservation, 'id' | 'createdAt'>): Promise<string | null> => {

@@ -56,6 +56,10 @@ export interface Reservation {
   status?: string;
   manager?: string;
   fullName?: string;
+  userId?: string;
+  notes?:string;
+  createdAt?:string;
+  corFile?:string;
 }
 
 // Activity history interface
@@ -147,6 +151,30 @@ export const getBuildingsStatus = async (): Promise<BuildingStatus[]> => {
     return [];
   }
 };
+
+// Get reservation by ID
+export const getReservationById = async (reservationId: string): Promise<Reservation | null> => {
+  try {
+    const reservationRef = doc(db, 'reservations', reservationId);
+    const reservationSnap = await getDoc(reservationRef);
+    
+    if (reservationSnap.exists()) {
+      const data = reservationSnap.data();
+      return {
+        id: reservationSnap.id,
+        ...data,
+        createdAt: data.createdAt instanceof Timestamp ?
+          data.createdAt.toDate().toISOString().split('T')[0] :
+          data.createdAt
+      } as unknown as Reservation;
+    }
+    return null;
+  } catch (error) {
+    console.error(`Error getting reservation with ID ${reservationId}:`, error);
+    return null;
+  }
+};
+
 
 // Get all rooms with details
 export const getDetailedRooms = async (building?: string): Promise<Room[]> => {
@@ -474,6 +502,7 @@ export const updateReservationStatus = async (
   reservationId: string, 
   status: 'approved' | 'denied', 
   managerId: string
+
 ): Promise<boolean> => {
   try {
     console.log(`Updating reservation ${reservationId} to ${status}`);
@@ -506,6 +535,7 @@ export const updateReservationStatus = async (
       const userRef = doc(db, 'users', userId);
       await updateDoc(userRef, {
         roomApplicationStatus: status,
+        assignedRoom:roomName,
         lastUpdated: now.toISOString()
       });
     }
@@ -563,7 +593,7 @@ export const updateReservationStatus = async (
         if (userId) {
           const userRef = doc(db, 'users', userId);
           await updateDoc(userRef, {
-            assignedRoom: roomDoc.id,
+            assignedRoom: roomName,
             assignedBuilding: building
           });
         }
@@ -1142,20 +1172,26 @@ export const getAvailableRoomsByBuilding = async (building: string, dormId?: str
       return [];
     }
     
-    let roomsQuery;
-    
-    // Use the manager's assigned dormId for the query
-      roomsQuery = query(
-        collection(db, 'rooms'),
-      where('dormId', '==', managedDormId),
-        where('status', '==', 'available')
-      );
+    // Query all rooms in the manager's dormitory
+    const roomsQuery = query(
+      collection(db, 'rooms'),
+      where('dormId', '==', managedDormId)
+    );
     
     const roomsSnap = await getDocs(roomsQuery);
     
     // Map rooms and convert to array
     const rooms = roomsSnap.docs.map(doc => {
       const data = doc.data();
+      // Get occupant IDs array or initialize as empty array
+      const occupantIds = data.occupantIds || [];
+      
+      // Calculate current occupants based on occupantIds length if available
+      // Otherwise fall back to the stored currentOccupants value
+      const currentOccupants = occupantIds.length > 0 
+        ? occupantIds.length 
+        : data.currentOccupants || 0;
+      
       return { 
         id: doc.id,
         name: data.name || '',
@@ -1163,23 +1199,20 @@ export const getAvailableRoomsByBuilding = async (building: string, dormId?: str
         dormId: data.dormId || '',
         capacity: data.capacity || 0,
         status: data.status || 'available',
-        currentOccupants: data.currentOccupants || 0,
-        occupantIds: data.occupantIds || []
+        currentOccupants: currentOccupants,
+        occupantIds: occupantIds
       } as Room;
     });
     
     // Sort rooms by room number in ascending order
     return rooms.sort((a, b) => {
-      // Extract numeric part from room name (assuming format like "Room 01", "Room 2", etc.)
       const roomNumberA = parseInt(a.name.replace(/\D/g, ''));
       const roomNumberB = parseInt(b.name.replace(/\D/g, ''));
       
-      // If we can extract valid numbers, sort numerically
       if (!isNaN(roomNumberA) && !isNaN(roomNumberB)) {
         return roomNumberA - roomNumberB;
       }
       
-      // Fall back to string comparison if we can't extract numbers
       return a.name.localeCompare(b.name);
     });
   } catch (error) {
@@ -2621,4 +2654,4 @@ export const getManagerDashboardStatsByDorm = async (): Promise<{
       activeStudents: 0
     };
   }
-}; 
+};

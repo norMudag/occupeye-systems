@@ -392,20 +392,7 @@ export default function ManagerDashboard() {
           </Card>
         </div>
 
-        <Tabs defaultValue="reservations" className="space-y-6">
-          <TabsList className="bg-muted border border-secondary/20">
-            <TabsTrigger value="reservations" className="data-[state=active]:bg-primary data-[state=active]:text-white">
-              Reservation Analytics
-            </TabsTrigger>
-            
-            <TabsTrigger value="approvals" className="data-[state=active]:bg-primary data-[state=active]:text-white">
-              Applications
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Reservation Analytics Tab */}
-          <TabsContent value="reservations" className="space-y-6">
-            <Card className="border-secondary/20">
+        <Card className="border-secondary/20">
               <CardHeader className="border-b border-secondary/20">
                 <div className="flex items-center justify-between">
                   <div>
@@ -425,8 +412,8 @@ export default function ManagerDashboard() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value={getCurrentSemester()}>{getCurrentSemester()}</SelectItem>
-                        <SelectItem value="1st Semester 2023-2024">1st Semester 2023-2024</SelectItem>
-                        <SelectItem value="2nd Semester 2023-2024">2nd Semester 2023-2024</SelectItem>
+                        <SelectItem value="1st Semester 2025-2026">1st Semester 2025-2026</SelectItem>
+                        <SelectItem value="2nd Semester 2025-2026">2nd Semester 2025-2026</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -509,103 +496,6 @@ export default function ManagerDashboard() {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
-
-       
-
-          {/* Applications Tab (Original Content) */}
-          <TabsContent value="approvals" className="space-y-6">
-            <Card className="border-secondary/20">
-              <CardHeader className="border-b border-secondary/20">
-                <CardTitle className="text-primary">Pending Dormitory Applications</CardTitle>
-                <CardDescription>Review and approve or deny student housing applications</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                {isLoading ? (
-                  <div className="text-center py-8">
-                    <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading applications...</p>
-                  </div>
-                ) : pendingReservations.length === 0 ? (
-                  <div className="text-center py-8">
-                    <CheckCircle className="h-12 w-12 text-success mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-primary mb-2">All caught up!</h3>
-                    <p className="text-gray-600">No pending applications to review at this time.</p>
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-secondary/20">
-                        <TableHead>Student</TableHead>
-                        <TableHead>Building</TableHead>
-                        <TableHead>Room</TableHead>
-                        <TableHead>Semester</TableHead>
-                        <TableHead>Attendees</TableHead>
-                        <TableHead>Purpose</TableHead>
-                        <TableHead>Submitted</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {pendingReservations.map((reservation) => (
-                        <TableRow key={reservation.id} className="border-secondary/20">
-                          <TableCell>
-                            <div className="font-medium">{reservation.fullName || reservation.student}</div>
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">{reservation.building}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="font-medium">{reservation.room}</div>
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">{reservation.semester}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">{reservation.attendees || 1}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="font-medium">{reservation.purpose}</div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="font-medium">{reservation.requestDate}</div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex space-x-2">
-                              <Button
-                                size="sm"
-                                onClick={() => handleApproveReservation(reservation.id)}
-                                className="bg-success hover:bg-success/90 text-white"
-                              >
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Approve
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleDenyReservation(reservation.id)}
-                                className="bg-warning hover:bg-warning/90 text-white"
-                              >
-                                <XCircle className="h-4 w-4 mr-1" />
-                                Deny
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
       </main>
     </div>
   )

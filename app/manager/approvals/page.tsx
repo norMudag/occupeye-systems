@@ -33,6 +33,7 @@ import { getAdminUserIds, notifyAdminRoomAssignment } from "@/app/utils/notifica
 import { doc, getDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { toast } from "sonner"
+import Link from "next/link"
 
 export default function ManagerApprovals() {
   const [user] = useAuthState(auth)
@@ -55,6 +56,8 @@ export default function ManagerApprovals() {
   const [selectedRoomId, setSelectedRoomId] = useState<string>("")
   const [isAssigningRoom, setIsAssigningRoom] = useState(false)
   const [loadingRooms, setLoadingRooms] = useState(false)
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -284,6 +287,7 @@ export default function ManagerApprovals() {
   }
 
   const filteredReservations = pendingReservations.filter((reservation) => {
+    
     // Handle potential undefined values safely
     const studentName = (reservation.student || '').toLowerCase();
     const studentId = (reservation.studentId || '').toLowerCase();
@@ -441,6 +445,7 @@ export default function ManagerApprovals() {
                 </TableHeader>
                 <TableBody>
                   {filteredReservations.map((reservation) => (
+                    
                     <TableRow key={reservation.id} className="border-secondary/20">
                       <TableCell>
                         <div>
@@ -484,6 +489,17 @@ export default function ManagerApprovals() {
                             <XCircle className="h-4 w-4 mr-1" />
                             Deny
                           </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-secondary/20 text-primary hover:bg-secondary/10"
+                          >
+                            <Link href={`/manager/reservations/${reservation.id}`}>
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                            </Link>
+                          </Button>
+                          
                         </div>
                       </TableCell>
                     </TableRow>

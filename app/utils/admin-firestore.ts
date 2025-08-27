@@ -72,6 +72,7 @@ export interface RfidLog {
   id: string;
   studentId: string;
   studentName: string;
+  contactNumber:string;
   room: string;
   building?: string;
   dormId?: string;
@@ -128,6 +129,7 @@ export const getUsers = async (role?: string): Promise<User[]> => {
         status: data.status || 'exit', // Default to 'exit' if not specified
         rfidCard: data.rfidCard,
         studentId: data.studentId,
+        contactNumber:data.contactNumber,
         managerId: data.managerId,
         lastLogin: data.lastLogin,
         academicStatus: data.academicStatus || '',
@@ -168,6 +170,7 @@ export const getUserById = async (userId: string): Promise<User | null> => {
         rfidCard: data.rfidCard,
         studentId: data.studentId,
         managerId: data.managerId,
+        contactNumber:data.contactNumber,
         academicStatus: data.academicStatus || '',
         managedBuildings: data.managedBuildings || [],
         assignedRoom: data.assignedRoom || null,
@@ -554,6 +557,7 @@ export const getRfidLogs = async (filters?: {
   action?: string;
   limit?: number;
   dormName?: string; // Add dormName filter
+  contactNumber?:string
 }): Promise<RfidLog[]> => {
   try {
     let logsQuery: any = collection(db, 'rfidLogs');
@@ -707,6 +711,7 @@ export const getRfidLogs = async (filters?: {
         room: data.room || '',
         building: data.building,
         dormId: data.dormId || '',
+        contactNumber:userData.contactNumber,
         dormName: data.dormName || '',
         action: data.action || '',
         timestamp: formattedTimestamp,

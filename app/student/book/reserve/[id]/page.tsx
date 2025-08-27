@@ -38,6 +38,7 @@ export default function ApplyForDormRoom() {
     academicYear: "",
     purpose: "",
     notes: "",
+    corFile: "", // Add new state for COR file path
   })
   
   useEffect(() => {
@@ -118,7 +119,14 @@ export default function ApplyForDormRoom() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!user || !dorm) return
+    if (!user || !dorm || !application.corFile) {
+      toast({
+        title: "Missing Requirements",
+        description: "Please upload your Certificate of Registration",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setIsLoading(true)
 
@@ -145,8 +153,10 @@ export default function ApplyForDormRoom() {
         userId: user.uid,
         attendees: 1, // Fixed to 1 student per application
         notes: application.notes || "",
-        fullName // Add full name to reservation
+        fullName, // Add full name to reservation
+        corFile: application.corFile || "", 
       }
+      console.log("APPLICATION DATA" ,applicationData)
       
       // Save to Firestore
       const applicationId = await createReservation(applicationData)
@@ -284,7 +294,45 @@ export default function ApplyForDormRoom() {
                       onChange={(e) => setApplication({...application, notes: e.target.value})}
                     />
                   </div>
+                 {/* Certificate of Registration Upload Field */}
+               <Input
+                id="cor"
+                type="file"
+                accept=".pdf"  // ✅ only pdf allowed
+                className="border-secondary/20"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    formData.append("directory", "uploads/cor"); // ✅ custom folder
 
+                    try {
+                      const res = await fetch("/api/upload", {
+                        method: "POST",
+                        body: formData,
+                      });
+
+                      if (!res.ok) throw new Error("Upload failed");
+
+                      const data = await res.json();
+                      setApplication({ ...application, corFile: data.path }); // save path for Firestore
+                    } catch (error) {
+                      console.error("Upload error:", error);
+                      toast({
+                        title: "Upload Error",
+                        description: "Failed to upload COR. Please try again.",
+                        variant: "destructive",
+                      });
+                    }
+                  }
+                }}
+                required
+              />
+              <p className="text-sm text-gray-500">
+                Please upload your Certificate of Registration (PDF format only)
+              </p>
+                
                   <div className="pt-4 flex justify-end space-x-4">
                     <Button 
                       type="button" 

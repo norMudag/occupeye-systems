@@ -139,6 +139,7 @@ export default function ViewReservation() {
     )
   }
 
+  
   const isActive = reservation.status === "pending"
 
   return (

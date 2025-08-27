@@ -976,7 +976,7 @@ export default function AdminDashboard() {
                   <Card className="border-secondary/20">
                     <CardHeader className="py-2 px-4 border-b border-secondary/20">
                       <CardTitle className="text-sm font-medium">Recent RFID Activity Trend</CardTitle>
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center etween">
                         <CardDescription className="text-xs">
                           {rfidTimeRange === 'today' ? 'Today\'s activity by hour' : 
                            rfidTimeRange === 'week' ? 'Last 7 days activity' : 

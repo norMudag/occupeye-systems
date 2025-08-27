@@ -11,6 +11,7 @@ interface LogEntry {
   action: string;
   timestamp: any;
   timestampMillis: number;
+  contactNumber:string;
 }
 
 // Helper function to get current timestamp in UTC+8
