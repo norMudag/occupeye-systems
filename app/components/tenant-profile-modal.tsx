@@ -19,7 +19,7 @@ export default function TenantProfileModal({ open, onOpenChange, userId }: Tenan
   const [isLoading, setIsLoading] = useState(false)
   const [tenant, setTenant] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
-
+  
   useEffect(() => {
     const fetchTenantData = async () => {
       if (!userId) return
@@ -47,6 +47,8 @@ export default function TenantProfileModal({ open, onOpenChange, userId }: Tenan
     }
   }, [open, userId])
 
+  const joinDate =  tenant?.createdAt ? new Date (tenant.createdAt).toLocaleDateString("en-US",{
+    year:"numeric", month:"long", day:"numeric" }):null;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
@@ -109,11 +111,12 @@ export default function TenantProfileModal({ open, onOpenChange, userId }: Tenan
               </div>
               <div className="flex items-center">
                 <Phone className="h-3.5 w-3.5 text-primary mr-2" />
-                <span className="text-gray-600">{tenant.phone || "No phone number"}</span>
+                <span className="text-gray-600">{tenant.contactNumber || "No phone number"}</span>
               </div>
               <div className="flex items-center">
                 <Calendar className="h-3.5 w-3.5 text-primary mr-2" />
-                <span className="text-gray-600">Joined: {tenant.createdAt || "Unknown"}</span>
+               <span className="text-gray-600">
+              Joined: {joinDate}</span>
               </div>
             </div>
             

@@ -22,36 +22,7 @@ interface ManagerUserData {
 }
 
 // Helper function to calculate duration between timestamps using UTC+8 time (Philippine time)
-const calculateDuration = (exitTime: string, entryTime: string): string => {
-  try {
-    let exitDate = new Date(exitTime.replace(' ', 'T'));
-    let entryDate = new Date(entryTime.replace(' ', 'T'));
-    const currentYear = new Date().getFullYear();
-    const maxValidYear = currentYear + 1;
-    if (isNaN(exitDate.getTime()) || exitDate.getFullYear() > maxValidYear ||
-        isNaN(entryDate.getTime()) || entryDate.getFullYear() > maxValidYear) {
-      const now = new Date();
-      exitDate = now;
-      entryDate = new Date(now.getTime() - 60 * 60 * 1000);
-    }
-    const diffMs = exitDate.getTime() - entryDate.getTime();
-    if (diffMs <= 0) return '-';
-    if (diffMs >= 60 * 60 * 1000) {
-      const hours = Math.floor(diffMs / (60 * 60 * 1000));
-      const minutes = Math.floor((diffMs % (60 * 60 * 1000)) / (60 * 1000));
-      return `${hours}h ${minutes}m`;
-    }
-    if (diffMs >= 60 * 1000) {
-      const minutes = Math.floor(diffMs / (60 * 1000));
-      const seconds = Math.floor((diffMs % (60 * 1000)) / 1000);
-      return `${minutes}m ${seconds}s`;
-    }
-    const seconds = Math.max(1, Math.floor(diffMs / 1000));
-    return `${seconds}s`;
-  } catch (error) {
-    return '-';
-  }
-};
+
 
 export default function ManagerRfidLogs() {
   const { userData } = useAuth() as { userData: ManagerUserData | null };
@@ -79,72 +50,9 @@ export default function ManagerRfidLogs() {
   // Add state for user ID
   const [userId, setUserId] = useState("");
 
-  const fetchLogs = async () => {
-    setLoading(true);
-    try {
-      // Get the managed buildings for filtering
-      const managedBuildings = userData?.managedBuildings || [];
-      
-      // Get the managed dorm name if managedDormId exists
-      let dormName = "";
-      if (userData?.managedDormId) {
-        try {
-          const dormData = await getDormById(userData.managedDormId);
-          if (dormData) {
-            dormName = dormData.name;
-            setDormName(dormData.name);
-            console.log("Manager's dormitory name:", dormName);
-          }
-        } catch (error) {
-          console.error("Error fetching dorm data:", error);
-        }
-      }
-      
-      // Use the filter parameters in the getRfidLogs function
-      const allLogs = await getRfidLogs({ 
-        limit: 100,
-        room: roomFilter !== 'all' ? roomFilter : undefined,
-        action: actionFilter !== 'all' ? actionFilter : undefined,
-        dormName: dormName // Add dormName as a filter parameter
-      });
-      
-      console.log(`Fetched ${allLogs.length} logs total, filtering for dormName: ${dormName}`);
-      
-      // Filter logs for manager's managed buildings or managed dorm
-      const filteredLogs = allLogs.filter(
-        (log) => {
-          // If we have a dorm name, include logs with that dormName field
-          if (dormName && (log.dormName === dormName || log.building === dormName)) {
-            return true;
-          }
-          
-          // Also include logs from managed buildings
-          return log.building && managedBuildings.includes(log.building);
-        }
-      );
-      
-      console.log(`Filtered to ${filteredLogs.length} logs for dormName: ${dormName}`);
-      
-      // Apply search term filter if provided
-      if (searchTerm.trim()) {
-        const searchTermLower = searchTerm.toLowerCase();
-        const searchResults = filteredLogs.filter(log =>
-          log.studentId.toLowerCase().includes(searchTermLower) ||
-          log.studentName.toLowerCase().includes(searchTermLower) ||
-          (log.room || '').toLowerCase().includes(searchTermLower)
-        );
-        setLogs(searchResults);
-      } else {
-        setLogs(filteredLogs);
-      }
-    } catch (error) {
-      console.error("Error fetching logs:", error);
-      setLogs([]);
-      toast.error("Failed to load logs");
-    } finally {
-      setLoading(false);
-    }
-  };
+
+  
+ 
 
   // Process logs to add duration
   const processLogs = (logsData: RfidLog[]) => {
@@ -282,18 +190,122 @@ export default function ManagerRfidLogs() {
     return Array.from(uniqueRooms);
   };
 
-  // Update getFilteredLogs to filter by action and room
-  const getFilteredLogs = () => {
-    let filtered = processedLogs;
-    if (actionFilter !== 'all') {
-      filtered = filtered.filter(log => log.action === actionFilter);
-    }
-    if (roomFilter !== 'all') {
-      filtered = filtered.filter(log => (log.assignedRoom || log.userAssignedRoom || '') === roomFilter);
-    }
-    return filtered;
+
+   // ---------- TIMEZONE SAFE PARSING ----------
+  const parsePhilTime = (val?: string | Date | null): Date | null => {
+    if (!val) return null;
+    if (val instanceof Date) return val;
+    const s = String(val);
+    // already ISO with timezone?
+    if (/[zZ]|[+\-]\d{2}:\d{2}$/.test(s)) return new Date(s);
+    // convert "YYYY-MM-DD HH:mm:ss" → ISO
+    const iso = s.includes("T") ? s : s.replace(" ", "T");
+    return new Date(`${iso}+08:00`);
   };
 
+  // ---------- DURATION CALC ----------
+  const calculateDuration = (
+    exitTime: string | Date,
+    entryTime: string | Date
+  ): string => {
+    try {
+      const exitDate = parsePhilTime(exitTime) ?? new Date();
+      const entryDate =
+        parsePhilTime(entryTime) ??
+        new Date(exitDate.getTime() - 60 * 60 * 1000);
+
+      const diffMs = exitDate.getTime() - entryDate.getTime();
+      if (diffMs <= 0) return "-";
+
+      const hours = Math.floor(diffMs / (1000 * 60 * 60));
+      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+      if (hours > 0) return `${hours}h ${minutes}m`;
+      if (minutes > 0) return `${minutes}m ${seconds}s`;
+      return `${Math.max(1, seconds)}s`;
+    } catch {
+      return "-";
+    }
+  };
+
+  // ---------- FETCH ----------
+  const fetchLogs = async () => {
+    setLoading(true);
+    try {
+      const managedBuildings = userData?.managedBuildings || [];
+      let dormNameFetched = "";
+
+      if (userData?.managedDormId) {
+        try {
+          const dormData = await getDormById(userData.managedDormId);
+          if (dormData) {
+            dormNameFetched = dormData.name;
+            setDormName(dormData.name);
+          }
+        } catch (error) {
+          console.error("Error fetching dorm data:", error);
+        }
+      }
+
+      // ✅ fetch ALL actions (entry + exit) so duration works
+      const allLogs = await getRfidLogs({
+        limit: 500,
+        room: roomFilter !== "all" ? roomFilter : undefined,
+        dormName: dormNameFetched,
+      });
+
+      const filteredLogs = allLogs.filter((log) => {
+        if (
+          dormNameFetched &&
+          (log.dormName === dormNameFetched ||
+            log.building === dormNameFetched)
+        ) {
+          return true;
+        }
+        return log.building && managedBuildings.includes(log.building);
+      });
+
+      // ✅ apply search if any
+      if (searchTerm.trim()) {
+        const searchTermLower = searchTerm.toLowerCase();
+        const searchResults = filteredLogs.filter(
+          (log) =>
+            log.studentId.toLowerCase().includes(searchTermLower) ||
+            log.studentName.toLowerCase().includes(searchTermLower) ||
+            (log.room || "").toLowerCase().includes(searchTermLower)
+        );
+        setLogs(searchResults);
+      } else {
+        setLogs(filteredLogs);
+      }
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+      setLogs([]);
+      toast.error("Failed to load logs");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, [roomFilter]);
+
+  useEffect(() => {
+    setProcessedLogs(processLogs(logs));
+  }, [logs]);
+
+  const getFilteredLogs = () => {
+    let filtered = [...processedLogs];
+    if (actionFilter !== "all") {
+      filtered = filtered.filter((log) => log.action === actionFilter);
+    }
+    return filtered.sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+  };
   // Helper function to render a log card
   const renderLogCard = (log: RfidLog & { duration: string }, isLarge: boolean = false) => {
     const dateObj = new Date(log.timestamp.replace(' ', 'T'));
@@ -311,7 +323,7 @@ export default function ManagerRfidLogs() {
     <Card
         key={log.id}
         className={`border-2 hover:shadow-xl transition-all duration-300 ${
-          isLarge ? "border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10" : "hover:border-primary/20"
+          isLarge ? "border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 " : "hover:border-primary/20"
         }`}
       >
         <CardHeader className={`pb-4 ${isLarge ? "pb-6" : ""}`}>
@@ -321,12 +333,13 @@ export default function ManagerRfidLogs() {
                 className={`${isLarge ? "h-16 w-16" : "h-12 w-12"} bg-primary/10 rounded-full flex items-center justify-center`}
               >
                 <User className={`${isLarge ? "h-8 w-8" : "h-6 w-6"} text-primary`} />
+                
               </div>
               <div>
                 <CardTitle className={`${isLarge ? "text-2xl" : "text-lg"}`}>{log.studentName}</CardTitle>
                 <CardDescription className={`${isLarge ? "text-base" : "text-sm"}`}>
                   <div className="flex items-center gap-2">
-                  {log.studentId} | <Phone/>{log.contactNumber}
+                  {log.studentId} | <Phone className="h-3.5 w-3.5 text-primary mr-2"/>{log.contactNumber}
                   </div>
                   </CardDescription>
               </div>
@@ -410,106 +423,97 @@ export default function ManagerRfidLogs() {
   };
 
   
-  return (
+return (
     <div className="min-h-screen bg-background">
       <Navigation userRole="manager" />
-      <main className="container mx-auto px-6 py-12">
-        <div className="mb-12 text-center">
-          <h1 className="text-6xl font-bold text-primary mb-4">RFID Access Logs</h1>
-          <p className="text-2xl text-muted-foreground">Real-time dormitory access monitoring system</p>
+      <main className="container mx-auto px-4 py-6">
+        <div className="mb-6 text-center">
+          <h1 className="text-3xl font-bold text-primary mb-2">RFID Access Logs</h1>
+          <p className="text-base text-muted-foreground">Real-time dormitory access monitoring system</p>
         </div>
 
-        <Card className="border-2 border-primary/20 shadow-xl">
-          <CardHeader className="border-b border-primary/20 bg-primary/5">
-            <div className="flex justify-between items-center">
+        <Card className="border shadow-md">
+          <CardHeader className="border-b bg-primary/5 px-4 py-3">
+            <div className="flex justify-between items-center flex-wrap gap-4">
               <div>
-                <CardTitle className="text-3xl text-primary">RFID Access Logs</CardTitle>
-                <CardDescription className="text-lg mt-2">Showing access logs for managed buildings</CardDescription>
+                <CardTitle className="text-xl text-primary">RFID Access Logs</CardTitle>
+                <CardDescription className="text-sm mt-1">Showing access logs for managed buildings</CardDescription>
               </div>
 
-              <div className="flex flex-col md:flex-row gap-6 mb-10">
-                                  <div className="flex-1 relative">
-                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400" />
-                    <Input
-                      placeholder="Search users, rooms..."
-                      className="pl-14 h-16 text-xl border-2 border-primary/20"
-                      value={searchTerm}
-                      onChange={(e) => {
-                        setSearchTerm(e.target.value)
-                        if (!e.target.value.trim()) {
-                          fetchLogs()
-                        }
-                      }}
-                      onKeyDown={(e) => e.key === "Enter" && handleLogSearch()}
-                    />
-                  </div>
-                  <Select value={actionFilter} onValueChange={setActionFilter}>
-                    <SelectTrigger className="w-full md:w-[220px] h-16 text-xl border-2 border-primary/20">
-                      <SelectValue placeholder="All Actions" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Actions</SelectItem>
-                      <SelectItem value="entry">Entry Only</SelectItem>
-                      <SelectItem value="exit">Exit Only</SelectItem>
-                    </SelectContent>
-                  </Select>
-                
-            
-              
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={fetchLogs}
-                disabled={loading}
-                className="flex items-center gap-2 text-lg px-6 py-3 h-auto bg-transparent"
-              >
-                      
-                <RefreshCw className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
-                <span>Refresh</span>
-              </Button>
+              <div className="flex flex-wrap gap-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search users, rooms..."
+                    className="pl-9 h-10 text-sm border"
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value)
+                      if (!e.target.value.trim()) fetchLogs()
+                    }}
+                  />
                 </div>
+
+                <Select value={actionFilter} onValueChange={setActionFilter}>
+                  <SelectTrigger className="w-[160px] h-10 text-sm">
+                    <SelectValue placeholder="All Actions" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Actions</SelectItem>
+                    <SelectItem value="entry">Entry Only</SelectItem>
+                    <SelectItem value="exit">Exit Only</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={fetchLogs}
+                  disabled={loading}
+                  className="flex items-center gap-2 h-10 px-4"
+                >
+                  <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                  Refresh
+                </Button>
+              </div>
             </div>
           </CardHeader>
 
-          <CardContent className="pt-8">
+          <CardContent className="pt-4">
             {loading ? (
-              <div className="text-center py-20">
-                <div className="h-20 w-20 rounded-full border-6 border-primary border-t-transparent animate-spin mx-auto mb-8"></div>
-                <p className="text-2xl text-gray-600">Loading logs...</p>
+              <div className="text-center py-10">
+                <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto mb-4"></div>
+                <p className="text-sm text-gray-600">Loading logs...</p>
               </div>
             ) : logs.length === 0 ? (
-              <div className="text-center py-20 text-gray-600">
-                <Activity className="h-24 w-24 text-gray-400 mx-auto mb-8" />
-                <h3 className="text-3xl font-semibold mb-4">No logs found</h3>
-                <p className="text-xl">No logs found for your managed buildings.</p>
+              <div className="text-center py-10 text-gray-600">
+                <Activity className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+                <h3 className="text-lg font-semibold mb-1">No logs found</h3>
+                <p className="text-sm">No logs found for your managed buildings.</p>
               </div>
             ) : (
-              <div>
-   
+              <div className="space-y-6">
+                {/* Latest log */}
+                {getFilteredLogs().length > 0 && (
+                  <div>
+                    <h2 className="text-lg font-semibold mb-2 text-primary">Latest Access</h2>
+                    {renderLogCard(getFilteredLogs()[0], true)}
+                  </div>
+                )}
 
-                <div className="space-y-8">
-                  {/* Most recent log - large featured card */}
-                  {getFilteredLogs().length > 0 && (
-                    <div className="mb-8">
-                      <h2 className="text-2xl font-semibold mb-4 text-primary">Latest Access</h2>
-                      {renderLogCard(getFilteredLogs()[0], true)}
+                {/* Other logs */}
+                {getFilteredLogs().length > 1 && (
+                  <div>
+                    <h2 className="text-lg font-semibold mb-3 text-primary">Recent Activity</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {getFilteredLogs()
+                        .slice(1, 7)
+                        .map((log) => (
+                          <div key={log.id}>{renderLogCard(log)}</div>
+                        ))}
                     </div>
-                  )}
-
-                  {/* Other logs - grid of smaller cards */}
-                  {getFilteredLogs().length > 1 && (
-                    <div>
-                      <h2 className="text-2xl font-semibold mb-6 text-primary">Recent Activity</h2>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {getFilteredLogs()
-                          .slice(1, 7)
-                          .map((log) => (
-                            <div key={log.id}>{renderLogCard(log)}</div>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>

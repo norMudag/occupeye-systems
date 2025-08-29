@@ -1,91 +1,59 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-import { RfidLog } from "@/app/utils/admin-firestore";
+import { CreditCard, Scan, DoorOpen, Search, User, Clock, Calendar, Building, RefreshCw, Activity, LogIn, LogOut, MapPin, Shield, Phone } from "lucide-react";
+import Navigation from "@/components/navigation";
+import { getRfidLogs, RfidLog, getDormById } from "@/app/utils/admin-firestore";
+import { useAuth } from "@/lib/AuthContext";
 import { toast } from "sonner";
+import { useRfidService } from "@/lib/RfidService";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// Helper function to calculate duration between timestamps
-const calculateDuration = (exitTime: string, entryTime: string): string => {
-  try {
-    let exitDate = new Date(exitTime.replace(' ', 'T'));
-    let entryDate = new Date(entryTime.replace(' ', 'T'));
-    const currentYear = new Date().getFullYear();
-    const maxValidYear = currentYear + 1;
-    if (isNaN(exitDate.getTime()) || exitDate.getFullYear() > maxValidYear ||
-        isNaN(entryDate.getTime()) || entryDate.getFullYear() > maxValidYear) {
-      const now = new Date();
-      exitDate = now;
-      entryDate = new Date(now.getTime() - 60 * 60 * 1000);
-    }
-    const diffMs = exitDate.getTime() - entryDate.getTime();
-    if (diffMs <= 0) return '-';
-    if (diffMs >= 60 * 60 * 1000) {
-      const hours = Math.floor(diffMs / (60 * 60 * 1000));
-      const minutes = Math.floor((diffMs % (60 * 60 * 1000)) / (60 * 1000));
-      return `${hours}h ${minutes}m`;
-    }
-    if (diffMs >= 60 * 1000) {
-      const minutes = Math.floor(diffMs / (60 * 1000));
-      const seconds = Math.floor((diffMs % (60 * 1000)) / 1000);
-      return `${minutes}m ${seconds}s`;
-    }
-    const seconds = Math.max(1, Math.floor(diffMs / 1000));
-    return `${seconds}s`;
-  } catch (error) {
-    return '-';
-  }
-};
+// Extend UserData to include managedBuildings for type safety
+interface ManagerUserData {
+  managedBuildings: string[];
+  managedDormId?: string;
+  [key: string]: any;
+}
+
+// Helper function to calculate duration between timestamps using UTC+8 time (Philippine time)
+
 
 export default function StandaloneRfidLogs() {
+  const { userData } = useAuth() as { userData: ManagerUserData | null };
   const [logs, setLogs] = useState<RfidLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [rfidValue, setRfidValue] = useState("");
+  const [roomId, setRoomId] = useState("");
+  const [rfidLoading, setRfidLoading] = useState(false);
   const [processedLogs, setProcessedLogs] = useState<(RfidLog & { duration: string })[]>([]);
   const [roomFilter, setRoomFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [actionFilter, setActionFilter] = useState('all');
+  const [dormName, setDormName] = useState<string>("");
   
-  // Auto-refresh every 10 seconds
-  useEffect(() => {
-    const fetchLogs = async () => {
-      setLoading(true);
-      try {
-        // Fetch logs directly from the API
-        const response = await fetch('/api/rfid-logs', {
-          headers: {
-            // No authentication required for standalone display
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch logs: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        setLogs(data.logs || []);
-      } catch (error) {
-        console.error("Error fetching logs:", error);
-        setLogs([]);
-        toast.error("Failed to load logs");
-      } finally {
-        setLoading(false);
-      }
-    };
+  
+  // Get the global RFID service
+  const { 
+    isListening, 
+    status: rfidReaderStatus, 
+    toggleListening, 
+    currentBuffer, 
+    clearBuffer,
+    lastScanResult 
+  } = useRfidService();
 
-    // Initial fetch
-    fetchLogs();
-    
-    // Set up auto-refresh
-    const intervalId = setInterval(fetchLogs, 10000);
-    
-    // Clean up interval on unmount
-    return () => clearInterval(intervalId);
-  }, []);
+  // Add state for user ID
+  const [userId, setUserId] = useState("");
+
+
+  
+ 
 
   // Process logs to add duration
   const processLogs = (logsData: RfidLog[]) => {
@@ -135,168 +103,417 @@ export default function StandaloneRfidLogs() {
     return processed;
   };
 
-  // Filter logs by search term
+  // Add this function after processLogs and before useEffect
   const handleLogSearch = () => {
-    if (!searchTerm.trim()) {
-      setProcessedLogs(processLogs(logs));
-      return;
-    }
-    const filtered = processLogs(logs).filter(log =>
-      log.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.studentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (log.room || '').toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setProcessedLogs(filtered);
+    fetchLogs();
   };
 
-  // Update processed logs when raw logs change
+  // Update useEffect to refetch logs when filters change
+  useEffect(() => {
+    if (userData) fetchLogs();
+  }, [userData, roomFilter, actionFilter, searchTerm]);
+
+  // Refresh logs when a new RFID card is scanned
+  useEffect(() => {
+    if (lastScanResult?.success && userData) {
+      fetchLogs();
+    }
+  }, [lastScanResult, userData]);
+
+  // Process logs to add duration when logs change
   useEffect(() => {
     setProcessedLogs(processLogs(logs));
   }, [logs]);
 
-  // Helper to get unique rooms
+  // Handle RFID card reading with room ID
+  const handleRfidRead = async () => {
+    try {
+      if (!rfidValue.trim()) {
+        toast.error("Please enter an RFID value");
+        return;
+      }
+      
+      setRfidLoading(true);
+      
+      // Call the API endpoint to process the RFID reading
+      const response = await fetch('/api/rfid', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rfidValue: rfidValue.trim(),
+          roomId: roomId.trim() || undefined,
+          userId: userId.trim() || undefined, // Include user ID in the request
+      
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        toast.error(data.error || "Failed to process RFID card");
+        return;
+      }
+      
+      // Display success message with user info
+      if (data.success) {
+        toast.success(`Access ${data.logEntry.action} for ${data.user.firstName} ${data.user.lastName}`);
+        // Refresh logs to show the new entry
+        fetchLogs();
+      } else {
+        toast.error("Access denied");
+      }
+    } catch (error) {
+      console.error("Error processing RFID:", error);
+      toast.error("Failed to process RFID card");
+    } finally {
+      setRfidLoading(false);
+      // Clear the RFID input field
+      setRfidValue("");
+    }
+  };
+
+  // Helper to get unique rooms from manager's managed buildings
   const getUniqueRooms = () => {
     const uniqueRooms = new Set<string>();
     logs.forEach(log => {
+      const building = log.assignedBuilding || log.userAssignedBuilding || '';
       const room = log.assignedRoom || log.userAssignedRoom || '';
-      if (room && room.trim() !== '') {
+      
+      // Include rooms from managed buildings or the managed dorm
+      if (room && room.trim() !== '' && 
+          (userData?.managedBuildings?.includes(building) || 
+           (dormName && building === dormName))) {
         uniqueRooms.add(room);
       }
     });
     return Array.from(uniqueRooms);
   };
 
-  // Apply filters
-  const getFilteredLogs = () => {
-    let filtered = processedLogs;
-    if (actionFilter !== 'all') {
-      filtered = filtered.filter(log => log.action === actionFilter);
-    }
-    if (roomFilter !== 'all') {
-      filtered = filtered.filter(log => (log.assignedRoom || log.userAssignedRoom || '') === roomFilter);
-    }
-    return filtered;
+
+   // ---------- TIMEZONE SAFE PARSING ----------
+  const parsePhilTime = (val?: string | Date | null): Date | null => {
+    if (!val) return null;
+    if (val instanceof Date) return val;
+    const s = String(val);
+    // already ISO with timezone?
+    if (/[zZ]|[+\-]\d{2}:\d{2}$/.test(s)) return new Date(s);
+    // convert "YYYY-MM-DD HH:mm:ss" → ISO
+    const iso = s.includes("T") ? s : s.replace(" ", "T");
+    return new Date(`${iso}+08:00`);
   };
 
-  return (
+  // ---------- DURATION CALC ----------
+  const calculateDuration = (
+    exitTime: string | Date,
+    entryTime: string | Date
+  ): string => {
+    try {
+      const exitDate = parsePhilTime(exitTime) ?? new Date();
+      const entryDate =
+        parsePhilTime(entryTime) ??
+        new Date(exitDate.getTime() - 60 * 60 * 1000);
+
+      const diffMs = exitDate.getTime() - entryDate.getTime();
+      if (diffMs <= 0) return "-";
+
+      const hours = Math.floor(diffMs / (1000 * 60 * 60));
+      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+      if (hours > 0) return `${hours}h ${minutes}m`;
+      if (minutes > 0) return `${minutes}m ${seconds}s`;
+      return `${Math.max(1, seconds)}s`;
+    } catch {
+      return "-";
+    }
+  };
+
+  // ---------- FETCH ----------
+  const fetchLogs = async () => {
+    setLoading(true);
+    try {
+      const managedBuildings = userData?.managedBuildings || [];
+      let dormNameFetched = "";
+
+      if (userData?.managedDormId) {
+        try {
+          const dormData = await getDormById(userData.managedDormId);
+          if (dormData) {
+            dormNameFetched = dormData.name;
+            setDormName(dormData.name);
+          }
+        } catch (error) {
+          console.error("Error fetching dorm data:", error);
+        }
+      }
+
+      // ✅ fetch ALL actions (entry + exit) so duration works
+      const allLogs = await getRfidLogs({
+        limit: 500,
+        room: roomFilter !== "all" ? roomFilter : undefined,
+        dormName: dormNameFetched,
+      });
+
+      const filteredLogs = allLogs.filter((log) => {
+        if (
+          dormNameFetched &&
+          (log.dormName === dormNameFetched ||
+            log.building === dormNameFetched)
+        ) {
+          return true;
+        }
+        return log.building && managedBuildings.includes(log.building);
+      });
+
+      // ✅ apply search if any
+      if (searchTerm.trim()) {
+        const searchTermLower = searchTerm.toLowerCase();
+        const searchResults = filteredLogs.filter(
+          (log) =>
+            log.studentId.toLowerCase().includes(searchTermLower) ||
+            log.studentName.toLowerCase().includes(searchTermLower) ||
+            (log.room || "").toLowerCase().includes(searchTermLower)
+        );
+        setLogs(searchResults);
+      } else {
+        setLogs(filteredLogs);
+      }
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+      setLogs([]);
+      toast.error("Failed to load logs");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, [roomFilter]);
+
+  useEffect(() => {
+    setProcessedLogs(processLogs(logs));
+  }, [logs]);
+
+  const getFilteredLogs = () => {
+    let filtered = [...processedLogs];
+    if (actionFilter !== "all") {
+      filtered = filtered.filter((log) => log.action === actionFilter);
+    }
+    return filtered.sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+  };
+  // Helper function to render a log card
+  const renderLogCard = (log: RfidLog & { duration: string }, isLarge: boolean = false) => {
+    const dateObj = new Date(log.timestamp.replace(' ', 'T'));
+    const date = dateObj.toLocaleDateString();
+    const time = dateObj.toLocaleTimeString();
+    const assignedRoom = log.assignedRoom || log.userAssignedRoom || '';
+    const assignedBuilding = log.assignedBuilding || log.userAssignedBuilding || '';
+    // Use the dorm name if the building matches
+    const displayBuilding = (dormName && assignedBuilding === dormName) ? dormName : assignedBuilding;
+    // Use log.dormName if available
+    const displayDormName = log.dormName || dormName || '';
+    const initials = log.studentName ? `${log.studentName.split(' ')[0][0] || ''}${log.studentName.split(' ')[1]?.[0] || ''}` : 'NA';
+    
+    return (
+    <Card
+        key={log.id}
+        className={`border-2 hover:shadow-xl transition-all duration-300 ${
+          isLarge ? "border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 " : "hover:border-primary/20"
+        }`}
+      >
+        <CardHeader className={`pb-4 ${isLarge ? "pb-6" : ""}`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div
+                className={`${isLarge ? "h-16 w-16" : "h-12 w-12"} bg-primary/10 rounded-full flex items-center justify-center`}
+              >
+                <User className={`${isLarge ? "h-8 w-8" : "h-6 w-6"} text-primary`} />
+                
+              </div>
+              <div>
+                <CardTitle className={`${isLarge ? "text-2xl" : "text-lg"}`}>{log.studentName}</CardTitle>
+                <CardDescription className={`${isLarge ? "text-base" : "text-sm"}`}>
+                  <div className="flex items-center gap-2">
+                  {log.studentId} | <Phone className="h-3.5 w-3.5 text-primary mr-2"/>{log.contactNumber}
+                  </div>
+                  </CardDescription>
+              </div>
+            </div>
+            <Badge
+              className={`${
+                log.action === "entry"
+                  ? "bg-green-500 hover:bg-green-600 text-white"
+                  : log.action === "exit"
+                    ? "bg-red-500 hover:bg-red-600 text-white"
+                    : "bg-destructive"
+              } ${isLarge ? "text-lg px-4 py-2" : "text-sm px-3 py-1"}`}
+            >
+              {log.action === "entry" ? (
+                <>
+                  <LogIn className={`${isLarge ? "h-5 w-5" : "h-4 w-4"} mr-1`} />
+                  Entry
+                </>
+              ) : log.action === "exit" ? (
+                <>
+                  <LogOut className={`${isLarge ? "h-5 w-5" : "h-4 w-4"} mr-1`} />
+                  Exit
+                </>
+              ) : (
+                log.action
+              )}
+            </Badge>
+          </div>
+        </CardHeader>
+
+        <CardContent className={`space-y-${isLarge ? "6" : "4"}`}>
+          <div className={`grid grid-cols-2 gap-${isLarge ? "6" : "4"}`}>
+            <div className="flex items-center gap-3">
+              <MapPin className={`${isLarge ? "h-6 w-6" : "h-4 w-4"} text-muted-foreground`} />
+              <div>
+                <p className={`${isLarge ? "text-base" : "text-sm"} font-medium`}>Room</p>
+                <p className={`${isLarge ? "text-base" : "text-sm"} text-muted-foreground`}>
+                  {assignedRoom || "Not assigned"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Shield className={`${isLarge ? "h-6 w-6" : "h-4 w-4"} text-muted-foreground`} />
+              <div>
+                <p className={`${isLarge ? "text-base" : "text-sm"} font-medium`}>Building</p>
+                <p className={`${isLarge ? "text-base" : "text-sm"} text-muted-foreground`}>
+                  {assignedBuilding || "Not assigned"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className={`grid grid-cols-2 gap-${isLarge ? "6" : "4"} pt-${isLarge ? "4" : "2"} border-t`}>
+            <div className="flex items-center gap-3">
+              <Clock className={`${isLarge ? "h-6 w-6" : "h-4 w-4"} text-muted-foreground`} />
+              <div>
+                <p className={`${isLarge ? "text-base" : "text-sm"} font-medium`}>Time</p>
+                <p className={`font-mono ${isLarge ? "text-lg" : "text-sm"}`}>{time}</p>
+                <p className={`${isLarge ? "text-sm" : "text-xs"} text-muted-foreground`}>{date}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Activity className={`${isLarge ? "h-6 w-6" : "h-4 w-4"} text-muted-foreground`} />
+              <div>
+                <p className={`${isLarge ? "text-base" : "text-sm"} font-medium`}>Duration</p>
+                <p className={`${isLarge ? "text-2xl" : "text-lg"} font-bold text-primary`}>{log.duration}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className={`pt-${isLarge ? "4" : "2"} border-t`}>
+            <Badge variant="outline" className={`${isLarge ? "text-sm" : "text-xs"}`}>
+              Student Access
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  
+return (
     <div className="min-h-screen bg-background">
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-primary">RFID Access Logs</h1>
+      <main className="container mx-auto px-4 py-6">
+        <div className="mb-6 text-center">
+          <h1 className="text-3xl font-bold text-primary mb-2">{dormName}</h1>
+          <p className="text-base text-muted-foreground">Real-time dormitory access monitoring system</p>
         </div>
 
-        <Card className="border-secondary/20">
-          <CardHeader className="border-b border-secondary/20">
-            <CardTitle className="text-primary">RFID Logs</CardTitle>
+        <Card className="border shadow-md">
+          <CardHeader className="border-b bg-primary/5 px-4 py-3">
+            <div className="flex justify-between items-center flex-wrap gap-4">
+              <div>
+                <CardTitle className="text-xl text-primary">RFID Access Logs</CardTitle>
+                <CardDescription className="text-sm mt-1">Showing access logs for managed buildings</CardDescription>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search users, rooms..."
+                    className="pl-9 h-10 text-sm border"
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value)
+                      if (!e.target.value.trim()) fetchLogs()
+                    }}
+                  />
+                </div>
+
+                <Select value={actionFilter} onValueChange={setActionFilter}>
+                  <SelectTrigger className="w-[160px] h-10 text-sm">
+                    <SelectValue placeholder="All Actions" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Actions</SelectItem>
+                    <SelectItem value="entry">Entry Only</SelectItem>
+                    <SelectItem value="exit">Exit Only</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={fetchLogs}
+                  disabled={loading}
+                  className="flex items-center gap-2 h-10 px-4"
+                >
+                  <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                  Refresh
+                </Button>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent className="pt-6">
+
+          <CardContent className="pt-4">
             {loading ? (
-              <div className="text-center py-8">
+              <div className="text-center py-10">
                 <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading logs...</p>
+                <p className="text-sm text-gray-600">Loading logs...</p>
               </div>
             ) : logs.length === 0 ? (
-              <div className="text-center py-8 text-gray-600">No logs found.</div>
+              <div className="text-center py-10 text-gray-600">
+                <Activity className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+                <h3 className="text-lg font-semibold mb-1">No logs found</h3>
+                <p className="text-sm">No logs found for your managed buildings.</p>
+              </div>
             ) : (
-              <div className="overflow-x-auto border border-secondary/20 rounded-lg">
-                <div className="flex flex-col md:flex-row gap-4 mb-6">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                      placeholder="Search users, rooms..."
-                      className="pl-10 border-secondary/20"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleLogSearch()}
-                    />
+              <div className="space-y-6">
+                {/* Latest log */}
+                {getFilteredLogs().length > 0 && (
+                  <div>
+                    <h2 className="text-lg font-semibold mb-2 text-primary">Latest Access</h2>
+                    {renderLogCard(getFilteredLogs()[0], true)}
                   </div>
-                  <Select value={actionFilter} onValueChange={setActionFilter}>
-                    <SelectTrigger className="w-full md:w-[180px] border-secondary/20">
-                      <SelectValue placeholder="All Actions" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Actions</SelectItem>
-                      <SelectItem value="entry">Entry Only</SelectItem>
-                      <SelectItem value="exit">Exit Only</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={roomFilter} onValueChange={setRoomFilter}>
-                    <SelectTrigger className="w-full md:w-[180px] border-secondary/20">
-                      <SelectValue placeholder="All Rooms" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Rooms</SelectItem>
-                      {getUniqueRooms().map(room => (
-                        <SelectItem key={room} value={room}>{room}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-secondary/20">
-                      <TableHead>User</TableHead>
-                      <TableHead>Assigned Room</TableHead>
-                      <TableHead>Assigned Building</TableHead>
-                      <TableHead>Action</TableHead>
-                      <TableHead>Timestamp</TableHead>
-                      <TableHead>Duration</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {getFilteredLogs().map((log) => {
-                      const dateObj = new Date(log.timestamp.replace(' ', 'T'));
-                      const date = dateObj.toLocaleDateString();
-                      const time = dateObj.toLocaleTimeString();
-                      const assignedRoom = log.assignedRoom || log.userAssignedRoom || '';
-                      const assignedBuilding = log.assignedBuilding || log.userAssignedBuilding || '';
-                      return (
-                        <TableRow key={log.id} className="border-secondary/20">
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">{log.studentName}</div>
-                              <div className="text-sm text-gray-500">{log.studentId}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {assignedRoom ? (
-                              <div className="font-medium">{assignedRoom}</div>
-                            ) : (
-                              <div className="text-sm text-gray-500">Not assigned</div>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {assignedBuilding ? (
-                              <div className="font-medium">
-                                {assignedBuilding}
-                              </div>
-                            ) : (
-                              <div className="text-sm text-gray-500">Not assigned</div>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={
-                              log.action === 'entry'
-                                ? 'bg-green-500'
-                                : log.action === 'exit'
-                                  ? 'bg-red-500'
-                                  : 'bg-destructive'
-                            }>
-                              {log.action === 'entry' ? 'Entry' : log.action === 'exit' ? 'Exit' : log.action}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <div className="font-mono">{time}</div>
-                              <div className="text-sm text-gray-500">{date}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>{log.duration}</TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                )}
+
+                {/* Other logs */}
+                {getFilteredLogs().length > 1 && (
+                  <div>
+                    <h2 className="text-lg font-semibold mb-3 text-primary">Recent Activity</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {getFilteredLogs()
+                        .slice(1, 7)
+                        .map((log) => (
+                          <div key={log.id}>{renderLogCard(log)}</div>
+                        ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
