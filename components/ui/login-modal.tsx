@@ -72,11 +72,55 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   }
 
   
+const handleKioksMode = async (email: string,password: string)=>{
+
+  try{
+    setIsLoading(true)
+    const logEmail =   email.replace("kioks.mode/", "")
+     console.log("Kiosk mode detected. Using email:", logEmail)
+       // Authenticate with base email
+     const userCredential = await login(logEmail, password)
+      // Get user data from Firestore to determine role
+      const userDoc = await getDoc(doc(db, "users", userCredential.uid))
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data()
+        const userRole = userData.role || "student"
+
+         switch (userRole) {
+          case "manager":
+          router.push("/rfid-logs")
+          break
+           default:
+          router.push("/student/reservations")
+      }
+    } else {
+      router.push("/student/reservations")
+    }
+
+  }catch(error){
+
+   console.error("Login error:", error)
+    toast.error("Failed to log in. Please check your credentials.")
+  } finally {
+    setIsLoading(false)
+  }
+  
+  
+}
+
   const handleLogin = async () => {
     try {
       setIsLoading(true)
+       
+        if (loginEmail.startsWith("kioks.mode/")) 
+          {handleKioksMode(loginEmail,loginPassword)}
+        
+        else{ 
       const userCredential = await login(loginEmail, loginPassword)
-      
+
+          console.log(`UserEmail: ${loginEmail}`)
+        
       // Get user data from Firestore to determine role
       const userDoc = await getDoc(doc(db, "users", userCredential.uid))
       
@@ -102,6 +146,9 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         // If no user data in Firestore, default to student reservations
         router.push("/student/reservations")
       }
+    }
+
+     
     } catch (error) {
       console.error("Login error:", error)
       toast.error("Failed to log in. Please check your credentials.")

@@ -686,6 +686,7 @@ export const getRfidLogs = async (filters?: {
       } else if (typeof data.timestamp === 'string') {
         formattedTimestamp = data.timestamp;
       } else {
+        
         // Default to current time if timestamp is invalid
         const now = new Date();
         const utcPlus8Date = new Date(now.getTime() + (8 * 60 * 60 * 1000));
