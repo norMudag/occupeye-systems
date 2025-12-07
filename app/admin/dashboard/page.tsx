@@ -9,10 +9,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select"
 import { Users, Building, Activity, Shield, Search, Plus, Edit, Trash2, Settings, X, RefreshCw } from "lucide-react"
-import { 
-  getUsers, 
-  getRooms, 
-  getRfidLogs, 
+import {
+  getUsers,
+  getRooms,
+  getRfidLogs,
   getDashboardStats,
   generateStudentId,
   generateManagerId,
@@ -83,7 +83,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [userRoleFilter, setUserRoleFilter] = useState('all')
   const [rfidActionFilter, setRfidActionFilter] = useState('all')
-  
+
   // User registration modal state
   const [registerModalOpen, setRegisterModalOpen] = useState(false)
   const [registerLoading, setRegisterLoading] = useState(false)
@@ -100,7 +100,7 @@ export default function AdminDashboard() {
     managedBuildings: [] as string[]
   })
   const [registerError, setRegisterError] = useState('')
-  
+
   // Room creation modal state
   const [roomModalOpen, setRoomModalOpen] = useState(false)
   const [roomLoading, setRoomLoading] = useState(false)
@@ -112,19 +112,19 @@ export default function AdminDashboard() {
     rfidEnabled: false
   })
   const [roomError, setRoomError] = useState('')
-  
+
   // Room edit modal state
   const [editRoomModalOpen, setEditRoomModalOpen] = useState(false)
   const [editRoomLoading, setEditRoomLoading] = useState(false)
   const [editRoomForm, setEditRoomForm] = useState<AdminRoom | null>(null)
   const [editRoomError, setEditRoomError] = useState('')
-  
+
   // User edit modal state
   const [editUserModalOpen, setEditUserModalOpen] = useState(false)
   const [editUserLoading, setEditUserLoading] = useState(false)
   const [editUserForm, setEditUserForm] = useState<User | null>(null)
   const [editUserError, setEditUserError] = useState('')
-  
+
   // User delete confirmation
   const [deleteUserModalOpen, setDeleteUserModalOpen] = useState(false)
   const [deleteUserLoading, setDeleteUserLoading] = useState(false)
@@ -147,7 +147,7 @@ export default function AdminDashboard() {
   // Academic Status options
   const academicStatusOptions = [
     "full scholar",
-    "muslim grant", 
+    "muslim grant",
     "partial scholar",
     "cultural scholar",
     "N/A"
@@ -161,19 +161,19 @@ export default function AdminDashboard() {
         // Get dashboard stats
         const dashboardStats = await getDashboardStats()
         setStats(dashboardStats)
-        
+
         // Get all users
         const allUsers = await getUsers()
         setUsers(allUsers)
-        
+
         // Get all rooms
         const allRooms = await getRooms()
         setRooms(allRooms)
-        
+
         // Get RFID logs
         const logs = await getRfidLogs({ limit: 10 })
         setRfidLogs(logs)
-        
+
         // Get RFID activity data for chart
         const activityData = await getRfidActivityData(rfidTimeRange)
         setRfidActivityData(activityData)
@@ -183,7 +183,7 @@ export default function AdminDashboard() {
         setLoading(false)
       }
     }
-    
+
     fetchData()
   }, [rfidTimeRange])
 
@@ -218,13 +218,13 @@ export default function AdminDashboard() {
       setUsers(allUsers)
       return
     }
-    
+
     try {
       // Note: This is a client-side filter. For a production app,
       // you would implement server-side search in Firestore
       const allUsers = await getUsers(userRoleFilter === 'all' ? undefined : userRoleFilter)
-      const filteredUsers = allUsers.filter(user => 
-        user.firstName.toLowerCase().includes(query.toLowerCase()) || 
+      const filteredUsers = allUsers.filter(user =>
+        user.firstName.toLowerCase().includes(query.toLowerCase()) ||
         user.lastName.toLowerCase().includes(query.toLowerCase()) ||
         user.email.toLowerCase().includes(query.toLowerCase()) ||
         (user.studentId && user.studentId.toLowerCase().includes(query.toLowerCase()))
@@ -244,15 +244,15 @@ export default function AdminDashboard() {
       setRfidLogs(logs)
       return
     }
-    
+
     try {
       // Note: This is a client-side filter. For a production app,
       // you would implement server-side search in Firestore
       const allLogs = await getRfidLogs(
         rfidActionFilter === 'all' ? { limit: 50 } : { action: rfidActionFilter, limit: 50 }
       )
-      const filteredLogs = allLogs.filter(log => 
-        log.studentId.toLowerCase().includes(query.toLowerCase()) || 
+      const filteredLogs = allLogs.filter(log =>
+        log.studentId.toLowerCase().includes(query.toLowerCase()) ||
         log.studentName.toLowerCase().includes(query.toLowerCase()) ||
         log.room.toLowerCase().includes(query.toLowerCase())
       )
@@ -261,35 +261,35 @@ export default function AdminDashboard() {
       console.error("Error searching logs:", error)
     }
   }
-  
+
   // Handle register form change
   const handleRegisterFormChange = (field: string, value: string) => {
     setRegisterForm({
       ...registerForm,
       [field]: value
     })
-    
+
     // Clear error when user types
     setRegisterError('')
   }
-  
+
   // Handle register form array change (for managedBuildings)
   const handleRegisterFormArrayChange = (field: string, value: string[]) => {
     setRegisterForm({
       ...registerForm,
       [field]: value
     })
-    
+
     // Clear error when user types
     setRegisterError('')
   }
-  
+
   // Handle dormitory toggle for managers
   const handleDormitoryToggle = (dormitory: string) => {
     if (!editUserForm) return
-    
+
     const currentBuildings = editUserForm.managedBuildings || []
-    
+
     if (currentBuildings.includes(dormitory)) {
       // Remove dormitory if already selected
       setEditUserForm({
@@ -304,19 +304,19 @@ export default function AdminDashboard() {
       })
     }
   }
-  
+
   // Handle role change with automatic ID generation
   const handleRoleChange = async (role: string) => {
     try {
       // When changing to student or manager, generate appropriate ID automatically
       let newId = null;
-      
+
       if (role === 'student') {
         newId = await generateStudentId();
       } else if (role === 'manager') {
         newId = await generateManagerId();
       }
-      
+
       setRegisterForm({
         ...registerForm,
         role: role,
@@ -329,13 +329,13 @@ export default function AdminDashboard() {
       console.error("Error generating ID:", error);
     }
   }
-  
+
   // Open register modal
   const openRegisterModal = async () => {
     try {
       // Generate a default student ID when opening the modal
       const studentId = await generateStudentId();
-      
+
       setRegisterForm({
         firstName: '',
         lastName: '',
@@ -348,7 +348,7 @@ export default function AdminDashboard() {
         academicStatus: 'N/A',
         managedBuildings: []
       });
-      
+
       setRegisterError('');
       setRegisterModalOpen(true);
     } catch (error) {
@@ -356,54 +356,54 @@ export default function AdminDashboard() {
       toast.error("Failed to prepare registration form");
     }
   }
-  
+
   // Close register modal
   const closeRegisterModal = () => {
     setRegisterModalOpen(false)
     setRegisterError('')
   }
-  
+
   // Handle register form submission
   const handleRegister = async () => {
     // Form validation
-    if (!registerForm.firstName || !registerForm.lastName || !registerForm.email || 
-        !registerForm.password || !registerForm.confirmPassword) {
+    if (!registerForm.firstName || !registerForm.lastName || !registerForm.email ||
+      !registerForm.password || !registerForm.confirmPassword) {
       setRegisterError("All fields are required")
       return
     }
-    
+
     if (registerForm.password !== registerForm.confirmPassword) {
       setRegisterError("Passwords do not match")
       return
     }
-    
+
     if (registerForm.password.length < 6) {
       setRegisterError("Password must be at least 6 characters")
       return
     }
-    
+
     // If role is student, student ID is required
     if (registerForm.role === 'student' && !registerForm.studentId) {
       setRegisterError("Student ID is required for student accounts")
       return
     }
-    
+
     // If role is manager, manager ID is required
     if (registerForm.role === 'manager' && !registerForm.managerId) {
       setRegisterError("Manager ID is required for manager accounts")
       return
     }
-    
+
     try {
       setRegisterLoading(true)
-      
+
       // Create user with Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         registerForm.email,
         registerForm.password
       )
-      
+
       // Prepare user data with appropriate null values
       const userData: Record<string, any> = {
         firstName: registerForm.firstName,
@@ -413,7 +413,7 @@ export default function AdminDashboard() {
         status: 'exit', // Default to 'exit' since new users start outside the building
         createdAt: new Date().toISOString()
       }
-      
+
       // Add role-specific fields
       if (registerForm.role === 'student') {
         userData.studentId = registerForm.studentId || null
@@ -432,24 +432,24 @@ export default function AdminDashboard() {
         userData.academicStatus = null
         userData.managedBuildings = []
       }
-      
+
       // Store additional user information in Firestore
       await setDoc(doc(db, "users", userCredential.user.uid), userData)
-      
+
       // Refresh user list
       const updatedUsers = await getUsers(userRoleFilter === 'all' ? undefined : userRoleFilter)
       setUsers(updatedUsers)
-      
+
       // Update stats
       const dashboardStats = await getDashboardStats()
       setStats(dashboardStats)
-      
+
       // Close modal and show success message
       closeRegisterModal()
       toast.success("User registered successfully")
     } catch (error: any) {
       console.error("Error registering user:", error)
-      
+
       if (error.code === 'auth/email-already-in-use') {
         setRegisterError("Email is already in use")
       } else {
@@ -466,11 +466,11 @@ export default function AdminDashboard() {
       ...roomForm,
       [field]: value
     })
-    
+
     // Clear error when user types
     setRoomError('')
   }
-  
+
   // Open room modal
   const openRoomModal = () => {
     setRoomForm({
@@ -483,13 +483,13 @@ export default function AdminDashboard() {
     setRoomError('')
     setRoomModalOpen(true)
   }
-  
+
   // Close room modal
   const closeRoomModal = () => {
     setRoomModalOpen(false)
     setRoomError('')
   }
-  
+
   // Handle room form submission
   const handleCreateRoom = async () => {
     // Form validation
@@ -497,15 +497,15 @@ export default function AdminDashboard() {
       setRoomError("Room number and building are required")
       return
     }
-    
+
     if (roomForm.capacity < 1) {
       setRoomError("Room capacity must be at least 1")
       return
     }
-    
+
     try {
       setRoomLoading(true)
-      
+
       // Create new room in Firestore
       const newRoomId = await createRoom({
         name: roomForm.name,
@@ -516,19 +516,19 @@ export default function AdminDashboard() {
         availableRooms: roomForm.capacity,
         currentOccupants: 0
       })
-      
+
       if (!newRoomId) {
         throw new Error("Failed to create room")
       }
-      
+
       // Refresh room list
       const updatedRooms = await getRooms()
       setRooms(updatedRooms)
-      
+
       // Update stats
       const dashboardStats = await getDashboardStats()
       setStats(dashboardStats)
-      
+
       // Close modal and show success message
       closeRoomModal()
       toast.success("Room created successfully")
@@ -546,13 +546,13 @@ export default function AdminDashboard() {
     setEditRoomError('')
     setEditRoomModalOpen(true)
   }
-  
+
   // Close edit room modal
   const closeEditRoomModal = () => {
     setEditRoomModalOpen(false)
     setEditRoomError('')
   }
-  
+
   // Handle edit room form change
   const handleEditRoomFormChange = (field: string, value: any) => {
     if (editRoomForm) {
@@ -561,34 +561,34 @@ export default function AdminDashboard() {
         [field]: value
       })
     }
-    
+
     // Clear error when user types
     setEditRoomError('')
   }
-  
+
   // Handle room settings
   const handleRoomSettings = (roomId: string) => {
     toast.info(`Room settings for ${roomId} - functionality coming soon!`)
   }
-  
+
   // Handle edit room form submission
   const handleUpdateRoom = async () => {
     if (!editRoomForm) return
-    
+
     // Form validation
     if (!editRoomForm.name || !editRoomForm.building) {
       setEditRoomError("Room number and building are required")
       return
     }
-    
+
     if (editRoomForm.capacity < 1) {
       setEditRoomError("Room capacity must be at least 1")
       return
     }
-    
+
     try {
       setEditRoomLoading(true)
-      
+
       // Update room in Firestore
       const updated = await updateRoom(editRoomForm.id, {
         name: editRoomForm.name,
@@ -597,19 +597,19 @@ export default function AdminDashboard() {
         status: editRoomForm.status,
         rfidEnabled: editRoomForm.rfidEnabled
       })
-      
+
       if (!updated) {
         throw new Error("Failed to update room")
       }
-      
+
       // Refresh room list
       const updatedRooms = await getRooms()
       setRooms(updatedRooms)
-      
+
       // Update stats
       const dashboardStats = await getDashboardStats()
       setStats(dashboardStats)
-      
+
       // Close modal and show success message
       closeEditRoomModal()
       toast.success("Room updated successfully")
@@ -627,13 +627,13 @@ export default function AdminDashboard() {
     setEditUserError('')
     setEditUserModalOpen(true)
   }
-  
+
   // Close edit user modal
   const closeEditUserModal = () => {
     setEditUserModalOpen(false)
     setEditUserError('')
   }
-  
+
   // Handle edit user form change
   const handleEditUserFormChange = (field: string, value: any) => {
     if (editUserForm) {
@@ -642,31 +642,31 @@ export default function AdminDashboard() {
         [field]: value
       })
     }
-    
+
     // Clear error when user types
     setEditUserError('')
   }
-  
+
   // Handle edit user role change with automatic ID generation
   const handleEditUserRoleChange = async (role: string) => {
     if (!editUserForm) return;
-    
+
     try {
       let newId = null;
-      
+
       // Only generate a new ID if the role is changing to student or manager
       if (role === 'student' && editUserForm.role !== 'student') {
         newId = await generateStudentId();
       } else if (role === 'manager' && editUserForm.role !== 'manager') {
         newId = await generateManagerId();
       }
-      
+
       // Create updated user form with proper field values based on role
       const updatedForm = {
         ...editUserForm,
         role: role
       };
-      
+
       // Set role-specific fields
       if (role === 'student') {
         updatedForm.studentId = editUserForm.role === 'student' ? editUserForm.studentId : newId;
@@ -685,39 +685,39 @@ export default function AdminDashboard() {
         updatedForm.academicStatus = null;
         updatedForm.managedBuildings = [];
       }
-      
+
       setEditUserForm(updatedForm);
     } catch (error) {
       console.error("Error updating role:", error);
       setEditUserError("Failed to update role");
     }
   }
-  
+
   // Handle edit user form submission
   const handleUpdateUser = async () => {
     if (!editUserForm) return
-    
+
     // Form validation
     if (!editUserForm.firstName || !editUserForm.lastName || !editUserForm.email) {
       setEditUserError("Name and email are required")
       return
     }
-    
+
     // If role is student, student ID is required
     if (editUserForm.role === 'student' && !editUserForm.studentId) {
       setEditUserError("Student ID is required for student accounts")
       return
     }
-    
+
     // If role is manager, manager ID is required
     if (editUserForm.role === 'manager' && !editUserForm.managerId) {
       setEditUserError("Manager ID is required for manager accounts")
       return
     }
-    
+
     try {
       setEditUserLoading(true)
-      
+
       // Prepare update data with role-specific fields
       let userData: Record<string, any> = {
         firstName: editUserForm.firstName,
@@ -727,7 +727,7 @@ export default function AdminDashboard() {
         status: editUserForm.status,
         rfidCard: editUserForm.rfidCard || null
       }
-      
+
       // Set specific fields based on user role
       if (editUserForm.role === 'student') {
         userData.studentId = editUserForm.studentId || null
@@ -746,22 +746,22 @@ export default function AdminDashboard() {
         userData.academicStatus = null
         userData.managedBuildings = []
       }
-      
+
       // Update user in Firestore
       const updated = await updateUser(editUserForm.id, userData)
-      
+
       if (!updated) {
         throw new Error("Failed to update user")
       }
-      
+
       // Refresh user list
       const updatedUsers = await getUsers(userRoleFilter === 'all' ? undefined : userRoleFilter)
       setUsers(updatedUsers)
-      
+
       // Update stats
       const dashboardStats = await getDashboardStats()
       setStats(dashboardStats)
-      
+
       // Close modal and show success message
       closeEditUserModal()
       toast.success("User updated successfully")
@@ -772,41 +772,41 @@ export default function AdminDashboard() {
       setEditUserLoading(false)
     }
   }
-  
+
   // Open delete user confirmation
   const openDeleteUserModal = (user: User) => {
     setUserToDelete(user)
     setDeleteUserModalOpen(true)
   }
-  
+
   // Close delete user confirmation
   const closeDeleteUserModal = () => {
     setDeleteUserModalOpen(false)
     setUserToDelete(null)
   }
-  
+
   // Handle user deletion
   const handleDeleteUser = async () => {
     if (!userToDelete) return
-    
+
     try {
       setDeleteUserLoading(true)
-      
+
       // Delete user from Firestore
       const deleted = await deleteUser(userToDelete.id)
-      
+
       if (!deleted) {
         throw new Error("Failed to delete user")
       }
-      
+
       // Refresh user list
       const updatedUsers = await getUsers(userRoleFilter === 'all' ? undefined : userRoleFilter)
       setUsers(updatedUsers)
-      
+
       // Update stats
       const dashboardStats = await getDashboardStats()
       setStats(dashboardStats)
-      
+
       // Close modal and show success message
       closeDeleteUserModal()
       toast.success("User deleted successfully")
@@ -905,7 +905,7 @@ export default function AdminDashboard() {
           <TabsTrigger value="rfid-analytics" className="text-xs h-8">Student Check-in/Check-out Activity</TabsTrigger>
           <TabsTrigger value="user-summary" className="text-xs h-8">User Management Summary</TabsTrigger>
         </TabsList>
-        
+
         {/* Reservation Activity Tracker Tab */}
         <TabsContent value="reservation-analytics" className="space-y-4">
           <Card className="border-secondary/20">
@@ -928,16 +928,16 @@ export default function AdminDashboard() {
                         <CardTitle className="text-sm font-medium">Reservation Status</CardTitle>
                       </CardHeader>
                       <CardContent className="p-4 h-[250px]">
-                        <StatusDistributionChart 
+                        <StatusDistributionChart
                           data={{
                             approved: stats.entriesCount || 0,
                             pending: stats.exitsCount || 0,
                             denied: stats.maintenanceRooms || 0
-                          }} 
+                          }}
                         />
                       </CardContent>
                     </Card>
-                    
+
                     {/* Most Reserved Dorms */}
                     <Card className="border-secondary/20">
                       <CardHeader className="py-2 px-4 border-b border-secondary/20">
@@ -945,12 +945,12 @@ export default function AdminDashboard() {
                       </CardHeader>
                       <CardContent className="p-4 h-[250px]">
                         <ResponsiveContainer width="100%" height="100%">
-                          <BarChart 
+                          <BarChart
                             data={[
                               { name: 'Available', value: stats.activeRooms || 0, fill: '#10b981' },
                               { name: 'Maintenance', value: stats.maintenanceRooms || 0, fill: '#f59e0b' },
                               { name: 'Occupied', value: (stats.totalRooms - stats.activeRooms - stats.maintenanceRooms) || 0, fill: '#2563eb' }
-                            ]} 
+                            ]}
                             margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
                           >
                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -971,45 +971,45 @@ export default function AdminDashboard() {
                       </CardContent>
                     </Card>
                   </div>
-                  
+
                   {/* Daily/Weekly/Monthly Reservations */}
                   <Card className="border-secondary/20">
                     <CardHeader className="py-2 px-4 border-b border-secondary/20">
                       <CardTitle className="text-sm font-medium">Recent RFID Activity Trend</CardTitle>
                       <div className="flex items-center etween">
                         <CardDescription className="text-xs">
-                          {rfidTimeRange === 'today' ? 'Today\'s activity by hour' : 
-                           rfidTimeRange === 'week' ? 'Last 7 days activity' : 
-                           'Last 30 days activity'}
+                          {rfidTimeRange === 'today' ? 'Today\'s activity by hour' :
+                            rfidTimeRange === 'week' ? 'Last 7 days activity' :
+                              'Last 30 days activity'}
                         </CardDescription>
                         <div className="flex space-x-2">
-                          <Button 
-                            variant={rfidTimeRange === 'today' ? 'default' : 'outline'} 
-                            size="sm" 
+                          <Button
+                            variant={rfidTimeRange === 'today' ? 'default' : 'outline'}
+                            size="sm"
                             onClick={() => handleRfidTimeRangeChange('today')}
                             className="text-xs h-7 px-2"
                           >
                             Today
                           </Button>
-                          <Button 
-                            variant={rfidTimeRange === 'week' ? 'default' : 'outline'} 
-                            size="sm" 
+                          <Button
+                            variant={rfidTimeRange === 'week' ? 'default' : 'outline'}
+                            size="sm"
                             onClick={() => handleRfidTimeRangeChange('week')}
                             className="text-xs h-7 px-2"
                           >
                             Week
                           </Button>
-                          <Button 
-                            variant={rfidTimeRange === 'month' ? 'default' : 'outline'} 
-                            size="sm" 
+                          <Button
+                            variant={rfidTimeRange === 'month' ? 'default' : 'outline'}
+                            size="sm"
                             onClick={() => handleRfidTimeRangeChange('month')}
                             className="text-xs h-7 px-2"
                           >
                             Month
                           </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={async () => {
                               setLoading(true);
                               try {
@@ -1034,7 +1034,7 @@ export default function AdminDashboard() {
                       {/* Use real RFID logs data */}
                       <div className="w-full h-full flex items-center justify-center">
                         {rfidLogs.length > 0 ? (
-                          <RFIDActivityChart 
+                          <RFIDActivityChart
                             hours={rfidActivityData.hours}
                             entryData={rfidActivityData.entryData}
                             exitData={rfidActivityData.exitData}
@@ -1076,30 +1076,30 @@ export default function AdminDashboard() {
                     <>
                       <div className="mb-6">
                         <div className="space-x-2 mb-4 flex justify-end">
-                          <Button 
-                            variant={rfidActionFilter === 'all' ? 'default' : 'outline'} 
-                            size="sm" 
+                          <Button
+                            variant={rfidActionFilter === 'all' ? 'default' : 'outline'}
+                            size="sm"
                             onClick={() => handleActionFilter('all')}
                           >
                             All
                           </Button>
-                          <Button 
-                            variant={rfidActionFilter === 'entry' ? 'default' : 'outline'} 
-                            size="sm" 
+                          <Button
+                            variant={rfidActionFilter === 'entry' ? 'default' : 'outline'}
+                            size="sm"
                             onClick={() => handleActionFilter('entry')}
                           >
                             Entries
                           </Button>
-                          <Button 
-                            variant={rfidActionFilter === 'exit' ? 'default' : 'outline'} 
-                            size="sm" 
+                          <Button
+                            variant={rfidActionFilter === 'exit' ? 'default' : 'outline'}
+                            size="sm"
                             onClick={() => handleActionFilter('exit')}
                           >
                             Exits
                           </Button>
                         </div>
                       </div>
-                      
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         {/* Check-ins per Day/Week */}
                         <Card className="border-secondary/20">
@@ -1134,7 +1134,7 @@ export default function AdminDashboard() {
                             </Table>
                           </CardContent>
                         </Card>
-                        
+
                         {/* RFID Activity Summary */}
                         <Card className="border-secondary/20">
                           <CardHeader className="py-2 px-4 border-b border-secondary/20">
@@ -1162,7 +1162,7 @@ export default function AdminDashboard() {
                           </CardContent>
                         </Card>
                       </div>
-                      
+
                       {/* RFID Activity Logs Table */}
                       <Card className="border-secondary/20">
                         <CardHeader className="py-2 px-4 border-b border-secondary/20">
@@ -1172,14 +1172,14 @@ export default function AdminDashboard() {
                           <div className="flex items-center space-x-4 mb-6">
                             <div className="relative flex-1">
                               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                              <Input 
-                                placeholder="Search by student ID or room..." 
+                              <Input
+                                placeholder="Search by student ID or room..."
                                 className="pl-10 border-secondary/20"
                                 onChange={(e) => handleLogSearch(e.target.value)}
                               />
                             </div>
                           </div>
-                          
+
                           <Table>
                             <TableHeader>
                               <TableRow className="border-secondary/20">
@@ -1248,7 +1248,7 @@ export default function AdminDashboard() {
                         <p className="text-xs text-muted-foreground">Registered student accounts</p>
                       </CardContent>
                     </Card>
-                    
+
                     <Card className="border-secondary/20">
                       <CardHeader className="py-2 px-4">
                         <CardTitle className="text-sm font-medium text-center">Total Managers</CardTitle>
@@ -1258,7 +1258,7 @@ export default function AdminDashboard() {
                         <p className="text-xs text-muted-foreground">Registered manager accounts</p>
                       </CardContent>
                     </Card>
-                    
+
                     <Card className="border-secondary/20">
                       <CardHeader className="py-2 px-4">
                         <CardTitle className="text-sm font-medium text-center">Total Admin</CardTitle>
@@ -1269,7 +1269,7 @@ export default function AdminDashboard() {
                       </CardContent>
                     </Card>
                   </div>
-                  
+
                   {/* User Management Tools */}
                   <Card className="border-secondary/20 mb-6">
                     <CardHeader className="flex flex-row items-center justify-between border-b border-secondary/20 py-3">
@@ -1277,7 +1277,7 @@ export default function AdminDashboard() {
                         <CardTitle className="text-primary text-base">User Account Management</CardTitle>
                         <CardDescription className="text-xs">Register and manage user accounts</CardDescription>
                       </div>
-                      <Button 
+                      <Button
                         className="bg-primary hover:bg-primary/90 text-white text-xs h-8"
                         onClick={openRegisterModal}
                       >
@@ -1289,14 +1289,14 @@ export default function AdminDashboard() {
                       <div className="flex items-center space-x-4 mb-6">
                         <div className="relative flex-1">
                           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                          <Input 
-                            placeholder="Search users..." 
+                          <Input
+                            placeholder="Search users..."
                             className="pl-10 border-secondary/20"
-                            onChange={(e) => handleUserSearch(e.target.value)} 
+                            onChange={(e) => handleUserSearch(e.target.value)}
                           />
                         </div>
-                        <Select 
-                          defaultValue="all" 
+                        <Select
+                          defaultValue="all"
                           onValueChange={(value) => handleRoleFilter(value)}
                         >
                           <SelectTrigger className="w-32 border-secondary/20">
@@ -1312,7 +1312,7 @@ export default function AdminDashboard() {
                       </div>
                     </CardContent>
                   </Card>
-                  
+
                   {/* Top Active Users */}
                   <Card className="border-secondary/20">
                     <CardHeader className="py-2 px-4 border-b border-secondary/20">
@@ -1338,8 +1338,8 @@ export default function AdminDashboard() {
                               <TableCell>
                                 <Badge
                                   className={
-                                    user.role === "admin" 
-                                      ? "bg-primary text-white" 
+                                    user.role === "admin"
+                                      ? "bg-primary text-white"
                                       : user.role === "manager"
                                         ? "bg-warning text-black"
                                         : "bg-secondary text-black"
@@ -1397,18 +1397,18 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
-                <Input 
+                <Input
                   id="firstName"
-                  value={registerForm.firstName} 
+                  value={registerForm.firstName}
                   onChange={(e) => handleRegisterFormChange('firstName', e.target.value)}
                   className="border-secondary/20"
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lastName">Last Name</Label>
-                <Input 
+                <Input
                   id="lastName"
-                  value={registerForm.lastName} 
+                  value={registerForm.lastName}
                   onChange={(e) => handleRegisterFormChange('lastName', e.target.value)}
                   className="border-secondary/20"
                 />
@@ -1416,10 +1416,10 @@ export default function AdminDashboard() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input 
+              <Input
                 id="email"
                 type="email"
-                value={registerForm.email} 
+                value={registerForm.email}
                 onChange={(e) => handleRegisterFormChange('email', e.target.value)}
                 className="border-secondary/20"
               />
@@ -1453,8 +1453,8 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex flex-col space-y-1.5">
                   <Label htmlFor="academicStatus">Academic Status</Label>
-                  <Select 
-                    value={registerForm.academicStatus} 
+                  <Select
+                    value={registerForm.academicStatus}
                     onValueChange={(value) => handleRegisterFormChange('academicStatus', value)}
                   >
                     <SelectTrigger id="academicStatus">
@@ -1521,20 +1521,20 @@ export default function AdminDashboard() {
             )}
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input 
+              <Input
                 id="password"
                 type="password"
-                value={registerForm.password} 
+                value={registerForm.password}
                 onChange={(e) => handleRegisterFormChange('password', e.target.value)}
                 className="border-secondary/20"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input 
+              <Input
                 id="confirmPassword"
                 type="password"
-                value={registerForm.confirmPassword} 
+                value={registerForm.confirmPassword}
                 onChange={(e) => handleRegisterFormChange('confirmPassword', e.target.value)}
                 className="border-secondary/20"
               />
@@ -1579,9 +1579,9 @@ export default function AdminDashboard() {
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="name">Room Number</Label>
-              <Input 
+              <Input
                 id="name"
-                value={roomForm.name} 
+                value={roomForm.name}
                 onChange={(e) => handleRoomFormChange('name', e.target.value)}
                 className="border-secondary/20"
               />
@@ -1606,10 +1606,10 @@ export default function AdminDashboard() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="capacity">Capacity</Label>
-              <Input 
+              <Input
                 id="capacity"
                 type="number"
-                value={roomForm.capacity} 
+                value={roomForm.capacity}
                 onChange={(e) => handleRoomFormChange('capacity', Number(e.target.value))}
                 className="border-secondary/20"
               />
@@ -1685,9 +1685,9 @@ export default function AdminDashboard() {
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
                 <Label htmlFor="edit-name">Room Number</Label>
-                <Input 
+                <Input
                   id="edit-name"
-                  value={editRoomForm.name} 
+                  value={editRoomForm.name}
                   onChange={(e) => handleEditRoomFormChange('name', e.target.value)}
                   className="border-secondary/20"
                 />
@@ -1712,10 +1712,10 @@ export default function AdminDashboard() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-capacity">Capacity</Label>
-                <Input 
+                <Input
                   id="edit-capacity"
                   type="number"
-                  value={editRoomForm.capacity} 
+                  value={editRoomForm.capacity}
                   onChange={(e) => handleEditRoomFormChange('capacity', Number(e.target.value))}
                   className="border-secondary/20"
                 />
@@ -1779,7 +1779,7 @@ export default function AdminDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       {/* User Edit Modal */}
       <Dialog open={editUserModalOpen} onOpenChange={closeEditUserModal}>
         <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
@@ -1794,18 +1794,18 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-firstName">First Name</Label>
-                  <Input 
+                  <Input
                     id="edit-firstName"
-                    value={editUserForm.firstName} 
+                    value={editUserForm.firstName}
                     onChange={(e) => handleEditUserFormChange('firstName', e.target.value)}
                     className="border-secondary/20"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-lastName">Last Name</Label>
-                  <Input 
+                  <Input
                     id="edit-lastName"
-                    value={editUserForm.lastName} 
+                    value={editUserForm.lastName}
                     onChange={(e) => handleEditUserFormChange('lastName', e.target.value)}
                     className="border-secondary/20"
                   />
@@ -1813,10 +1813,10 @@ export default function AdminDashboard() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-email">Email</Label>
-                <Input 
+                <Input
                   id="edit-email"
                   type="email"
-                  value={editUserForm.email} 
+                  value={editUserForm.email}
                   onChange={(e) => handleEditUserFormChange('email', e.target.value)}
                   className="border-secondary/20"
                   disabled
@@ -1852,8 +1852,8 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex flex-col space-y-1.5">
                     <Label htmlFor="editAcademicStatus">Academic Status</Label>
-                    <Select 
-                      value={editUserForm.academicStatus || 'N/A'} 
+                    <Select
+                      value={editUserForm.academicStatus || 'N/A'}
                       onValueChange={(value) => handleEditUserFormChange('academicStatus', value)}
                     >
                       <SelectTrigger id="editAcademicStatus">
@@ -1925,9 +1925,9 @@ export default function AdminDashboard() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-rfidCard">RFID Card ID</Label>
-                <Input 
+                <Input
                   id="edit-rfidCard"
-                  value={editUserForm.rfidCard || ''} 
+                  value={editUserForm.rfidCard || ''}
                   onChange={(e) => handleEditUserFormChange('rfidCard', e.target.value)}
                   className="border-secondary/20"
                 />
@@ -1960,7 +1960,7 @@ export default function AdminDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       {/* User Delete Confirmation */}
       <Dialog open={deleteUserModalOpen} onOpenChange={closeDeleteUserModal}>
         <DialogContent className="sm:max-w-md">

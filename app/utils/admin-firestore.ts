@@ -15,6 +15,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
+
 // User data interface
 export interface User {
   id: string;

@@ -1,19 +1,16 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Eye, Shield, Users, Calendar, Clock, MapPin, Smartphone, Badge } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/AuthContext"
-import { toast } from "sonner"
-import { db } from "@/lib/firebase"
-import { doc, setDoc, getDoc } from "firebase/firestore"
 import { generateStudentId } from "@/app/utils/admin-firestore"
+import { Button } from "@/components/ui/button"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Navbar from "@/components/ui/navbar"
+import { useAuth } from "@/lib/AuthContext"
+import { db } from "@/lib/firebase"
+import { doc, getDoc, setDoc } from "firebase/firestore"
+import { Clock, Eye, MapPin, Shield, Smartphone, Users } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -188,7 +185,7 @@ export default function LoginPage() {
               to ensure student safety and optimize dormitory management at MSU Marawi.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button  size="lg" className="text-lg px-8 py-6 text-white">
+              <Button onClick={() => { document.getElementById("features")?.scrollIntoView({ behavior: "smooth" }) }} size="lg" className="text-lg px-8 py-6 text-white" >
                 Learn More
               </Button>
             </div>
@@ -418,7 +415,19 @@ export default function LoginPage() {
                 <p className="text-primary">housing@msumain.edu.ph</p>
               </div>
             </div>
+
+            <div >
+              <h3 className="font-semibold mb-4">Contact Admin</h3>
+              <div className="space-y-2 text-muted-foreground">
+                <p> Facebook:{" "} <a href="https://www.facebook.com/bepl0pz/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" > Mohammad Nor Pumbaya Mudag </a> </p>
+                <p>Instagram: bulaaaaggaaa</p>
+                <p>Contact #: 0960-830-4670</p>
+                <p className="text-primary">mudag.mohammadnor@msumain.edu.ph</p>
+              </div>
+            </div>
           </div>
+
+            
 
           <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
             <p>&copy; 2024 OccupEye - MSU Marawi Housing Management Division. All rights reserved.</p>
