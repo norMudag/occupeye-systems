@@ -990,7 +990,20 @@ export default function UserManagement() {
                       </SelectContent>
                     </Select>
                   </div>
-                </>
+                  {/* RFID Card Number */}
+                  <div className="flex flex-col space-y-1.5">
+                    <Label htmlFor="editRfidCard">RFID Card</Label>
+                    <Input
+                      id="editRfidCard"
+                      type="number"
+                      placeholder="Enter RFID card number"
+                      value={editUserForm.rfidCard || ""}
+                      onChange={(e) =>
+                        handleEditUserFormChange("rfidCard", e.target.value)
+                      }
+                    />
+                  </div>
+                                  </>
               )}
               {editUserForm.role === 'manager' && (
                 <>
