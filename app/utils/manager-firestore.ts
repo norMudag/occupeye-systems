@@ -501,7 +501,9 @@ export const getRecentReservationsByDorm = async (limitCount: number = 10): Prom
 export const updateReservationStatus = async (
   reservationId: string, 
   status: 'approved' | 'denied', 
-  managerId: string
+  managerId: string,
+  rfidCardnumber:string
+
 
 ): Promise<boolean> => {
   try {
@@ -536,6 +538,7 @@ export const updateReservationStatus = async (
       await updateDoc(userRef, {
         roomApplicationStatus: status,
         assignedRoom:roomName,
+        rfidCard:rfidCardnumber,
         lastUpdated: now.toISOString()
       });
     }
@@ -595,6 +598,7 @@ export const updateReservationStatus = async (
           await updateDoc(userRef, {
             assignedRoom: roomName,
             assignedBuilding: building
+            
           });
         }
         
@@ -1223,13 +1227,13 @@ export const getAvailableRoomsByBuilding = async (building: string, dormId?: str
 
 // Assign a room to a reservation
 export const assignRoomToReservation = async (
-  reservationId: string,
-  roomId: string
+reservationId: string, roomId: string, 
 ): Promise<boolean> => {
   try {
     // Get the room data
     const roomRef = doc(db, 'rooms', roomId);
     const roomSnap = await getDoc(roomRef);
+
     
     if (!roomSnap.exists()) {
       throw new Error(`Room ${roomId} not found`);
@@ -1256,6 +1260,7 @@ export const assignRoomToReservation = async (
       roomName: roomName,
       updatedAt: new Date().toISOString()
     });
+    
     
     // If we have a valid userId, update the room's occupantIds array
     if (userId) {

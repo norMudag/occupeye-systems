@@ -34,6 +34,7 @@ import { doc, getDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { toast } from "sonner"
 import Link from "next/link"
+import { Label } from "@/components/ui/label"
 
 export default function ManagerApprovals() {
   const [user] = useAuthState(auth)
@@ -56,7 +57,7 @@ export default function ManagerApprovals() {
   const [selectedRoomId, setSelectedRoomId] = useState<string>("")
   const [isAssigningRoom, setIsAssigningRoom] = useState(false)
   const [loadingRooms, setLoadingRooms] = useState(false)
-
+  const [rfidCard, setRfidCard] = useState("");
 
 
   useEffect(() => {
@@ -170,15 +171,15 @@ export default function ManagerApprovals() {
       // First assign the room to the reservation
       const assignSuccess = await assignRoomToReservation(
         selectedReservation.id,
-        selectedRoomId
-      )
-      
+        selectedRoomId,
+      );
       if (assignSuccess) {
         // Then approve the reservation
         const approveSuccess = await updateReservationStatus(
           selectedReservation.id,
           'approved',
-          user.uid
+          user.uid,
+           rfidCard
         )
         
         if (approveSuccess) {
@@ -220,6 +221,7 @@ export default function ManagerApprovals() {
           setRoomAssignmentOpen(false)
           setSelectedReservation(null)
           setSelectedRoomId("")
+          setRfidCard(""); // reset RFID input
           
           toast.success(`Room ${selectedRoom.name} successfully assigned`);
         }
@@ -259,7 +261,7 @@ export default function ManagerApprovals() {
       }
       
       console.log(`Denying housing application with ID: ${id}`)
-      const success = await updateReservationStatus(id, 'denied', user.uid)
+      const success = await updateReservationStatus(id, 'denied', user.uid,"")
       
       if (success) {
         console.log(`Successfully denied housing application ${id}`)
@@ -514,79 +516,104 @@ export default function ManagerApprovals() {
       </main>
 
       {/* Room Assignment Dialog */}
-      <Dialog open={roomAssignmentOpen} onOpenChange={setRoomAssignmentOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Assign Room to Student</DialogTitle>
-            <DialogDescription>
-              Select a room to assign to {selectedReservation?.fullName || selectedReservation?.student} before approving their application.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="py-4">
-            <div className="mb-4">
-              <h4 className="text-sm font-medium mb-2">Building</h4>
-              <div className="flex items-center space-x-2 p-2 border rounded-md bg-secondary/10">
-                <Building className="h-4 w-4 text-primary" />
-                <span>{selectedReservation?.building}</span>
-              </div>
-            </div>
-            
-            <div className="mb-4">
-              <h4 className="text-sm font-medium mb-2">Available Rooms</h4>
-              {loadingRooms ? (
-                <div className="flex justify-center py-4">
-                  <div className="h-6 w-6 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
-                </div>
-              ) : availableRooms.length === 0 ? (
-                <div className="text-center py-4 text-warning">
-                  No available rooms in this building
-                </div>
-              ) : (
-                <Select value={selectedRoomId} onValueChange={setSelectedRoomId}>
-                  <SelectTrigger className="w-full border-secondary/20">
-                    <SelectValue placeholder="Select a room" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableRooms.map((room) => (
-                      <SelectItem key={room.id} value={room.id}>
-                        Room {room.name} - Capacity: {room.capacity}, Current: {room.currentOccupants || 0}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
+    <Dialog open={roomAssignmentOpen} onOpenChange={setRoomAssignmentOpen}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Assign Room to Student</DialogTitle>
+          <DialogDescription>
+            Select a room and enter RFID card to approve the application of{" "}
+            {selectedReservation?.fullName || selectedReservation?.student}.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="py-4">
+          {/* Building */}
+          <div className="mb-4">
+            <h4 className="text-sm font-medium mb-2">Building</h4>
+            <div className="flex items-center space-x-2 p-2 border rounded-md bg-secondary/10">
+              <Building className="h-4 w-4 text-primary" />
+              <span>{selectedReservation?.building}</span>
             </div>
           </div>
-          
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setRoomAssignmentOpen(false)}
-              disabled={isAssigningRoom}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleRoomAssignment} 
-              disabled={isAssigningRoom || loadingRooms || availableRooms.length === 0 || !selectedRoomId}
-              className="bg-success hover:bg-success/90 text-white"
-            >
-              {isAssigningRoom ? (
-                <>
-                  <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin mr-2"></div>
-                  Assigning...
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="h-4 w-4 mr-1" />
-                  Assign & Approve
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+          {/* Available Rooms */}
+          <div className="mb-4">
+            <h4 className="text-sm font-medium mb-2">Available Rooms</h4>
+
+            {loadingRooms ? (
+              <div className="flex justify-center py-4">
+                <div className="h-6 w-6 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
+              </div>
+            ) : availableRooms.length === 0 ? (
+              <div className="text-center py-4 text-warning">
+                No available rooms in this building
+              </div>
+            ) : (
+              <Select value={selectedRoomId} onValueChange={setSelectedRoomId}>
+                <SelectTrigger className="w-full border-secondary/20">
+                  <SelectValue placeholder="Select a room" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableRooms.map((room) => (
+                    <SelectItem key={room.id} value={room.id}>
+                      Room {room.name} - Capacity: {room.capacity}, Current:{" "}
+                      {room.currentOccupants || 0}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+
+          {/* RFID Card Input */}
+          <div className="mt-2">
+            <Label htmlFor="rfidCard">RFID Card</Label>
+            <Input
+              id="rfidCard"
+              type="number"
+              placeholder="Enter RFID card number"
+              value={rfidCard}
+              onChange={(e) => setRfidCard(e.target.value)}
+              required
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => setRoomAssignmentOpen(false)}
+            disabled={isAssigningRoom}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            onClick={handleRoomAssignment}
+            disabled={
+              isAssigningRoom ||
+              loadingRooms ||
+              availableRooms.length === 0 ||
+              !selectedRoomId ||
+              !rfidCard
+            }
+            className="bg-success hover:bg-success/90 text-white"
+          >
+            {isAssigningRoom ? (
+              <>
+                <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin mr-2"></div>
+                Assigning...
+              </>
+            ) : (
+              <>
+                <CheckCircle className="h-4 w-4 mr-1" />
+                Assign & Approve
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
     </div>
   )
 }
