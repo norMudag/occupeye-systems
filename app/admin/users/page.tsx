@@ -111,7 +111,7 @@ export default function UserManagement() {
   const fetchUsers = async (role?: string) => {
     try {
       setLoading(true)
-      const allUsers = await getUsers(role || userRoleFilter !== 'all' ? userRoleFilter : undefined)
+      const allUsers = await getUsers(role)
       setUsers(allUsers)
       // Reset to first page when loading new data
       setCurrentPage(1)
