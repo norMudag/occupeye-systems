@@ -319,6 +319,7 @@ export const getPendingReservationsByDorm = async (): Promise<Reservation[]> => 
         requestDate: data.requestDate || '',
         status: data.status || 'pending',
         manager: data.manager || '',
+        userId:data.userId,
         fullName: data.fullName || `${data.firstName || ''} ${data.lastName || ''}`.trim()
       } as Reservation;
     });
