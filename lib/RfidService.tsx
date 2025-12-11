@@ -37,7 +37,7 @@ interface RfidServiceProviderProps {
 
 export const RfidServiceProvider = ({ children, enabled = true }: RfidServiceProviderProps) => {
   const pathname = usePathname();
-  const isAllowedPath = pathname === '/manager/logs' || pathname === '/admin/logs';
+  const isAllowedPath = pathname === '/manager/logs' || pathname === '/admin/logs' || pathname === '/rfid-logs';
   
   const [autoDetectionEnabled, setAutoDetectionEnabled] = useState<boolean>(enabled && isAllowedPath);
   const [lastScannedRfid, setLastScannedRfid] = useState<string | null>(null);

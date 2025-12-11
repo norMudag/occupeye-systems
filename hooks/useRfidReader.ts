@@ -27,7 +27,8 @@ export function useRfidReader({
   showNotifications = true
 }: UseRfidReaderProps) {
   const pathname = usePathname();
-  const isAllowedPath = pathname === '/manager/logs' || pathname === '/admin/logs';
+  const isAllowedPath = pathname === '/manager/logs' || pathname === '/admin/logs' || pathname === '/rfid-logs';
+
   
   const [buffer, setBuffer] = useState<string>('');
   const [lastInputTime, setLastInputTime] = useState<number>(0);

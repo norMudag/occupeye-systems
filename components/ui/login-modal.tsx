@@ -14,7 +14,7 @@ import { toast } from "sonner"
 import { doc, getDoc, setDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { useAuth } from "@/lib/AuthContext"
-
+import Image from "next/image"
 interface LoginModalProps {
   isOpen: boolean
   onClose: () => void
@@ -244,10 +244,14 @@ const handleKioksMode = async (email: string,password: string)=>{
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
             <DialogTitle className="sr-only">OccupEye Login</DialogTitle>
-          <div className="flex items-center justify-center mb-4">
-            <div className="bg-primary p-3 rounded-full">
-              <Eye className="h-6 w-6 text-white" />
-            </div>
+          <div className="flex items-center justify-center ">
+            <Image
+              src="/logo/Logo.png"
+              alt="Logo"
+              width={90}
+              height={90}
+              priority
+            />
           </div>
           <div className="text-center">
             <h2 className="text-2xl font-bold text-primary">OccupEye</h2>

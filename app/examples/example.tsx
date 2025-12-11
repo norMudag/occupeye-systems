@@ -175,7 +175,8 @@ export default function Examples() {
         <div className="text-center">
           <div className="flex justify-center mb-4">
             <div className="bg-primary p-3 rounded-full">
-              <Eye className="h-8 w-8 text-white" />
+                          </div>
+
             </div>
           </div>
           <h1 className="text-3xl font-bold text-primary">OccupEye</h1>
