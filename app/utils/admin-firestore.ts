@@ -194,6 +194,8 @@ export const getUserById = async (userId: string): Promise<User | null> => {
   }
 };
 
+
+
 // Update user
 export const updateUser = async (userId: string, userData: Partial<User>): Promise<boolean> => {
   try {

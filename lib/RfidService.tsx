@@ -1,3 +1,4 @@
+// cant read "RFID Log" in kiosk mode page
 "use client";
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
