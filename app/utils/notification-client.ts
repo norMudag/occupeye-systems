@@ -1,10 +1,5 @@
-/**
- * Client-side utility functions for sending notifications
- */
-
-/**
- * Send a notification to a student
- */
+// Client-side utility functions for sending notifications
+//Send a notification to a student
 export const sendStudentNotification = async (
   userId: string,
   title: string,
