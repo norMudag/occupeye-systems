@@ -20,7 +20,7 @@ import { doc, getDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { RfidStatusIndicator } from "@/components/rfid-status-indicator"
 import { NotificationBell } from "@/components/notification-bell"
-
+import Image from "next/image"
 interface NavigationProps {
   userRole: "student" | "manager" | "admin"
 }
@@ -120,10 +120,15 @@ export default function Navigation({ userRole }: NavigationProps) {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-8">
-            <Link href="/" className="flex items-center space-x-2 group">
-              <div className="bg-secondary text-black p-2 rounded-lg transform transition-transform group-hover:scale-110 group-hover:rotate-3">
-                <Eye className="h-6 w-6" />
-              </div>
+            <Link href="/" className="flex items-center space-x-2 group p-2">
+            <Image
+              src="/logo/Logo.png"
+              alt="Logo"
+              width={40}
+              height={40}
+              priority
+              className="bg-secondary rounded-full"
+            />
               <span className="text-xl font-bold text-white group-hover:text-secondary transition-colors">OccupEye</span>
             </Link>
 

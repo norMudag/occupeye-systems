@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Eye } from "lucide-react"
 import LoginModal from "@/components/ui/login-modal"
+import Image from "next/image"
 
 export default function Navbar() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
@@ -14,9 +15,13 @@ export default function Navbar() {
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div className="bg-primary p-2 rounded-full">
-                <Eye className="h-5 w-5 text-white" />
-              </div>
+              <Image
+                src="/logo/Logo.png"
+                alt="Logo"
+                width={70}
+                height={70}
+                priority
+              />
               <span className="text-xl font-bold text-primary">OccupEye</span>
             </div>
 

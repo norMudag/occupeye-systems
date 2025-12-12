@@ -9,7 +9,15 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "OccupEye - Dormitory Space Tracking & Reservation System",
   description: "Modern web-based frontend for university housing division space tracking and reservation management",
-  generator: 'v0.dev'
+  icons: [
+    { rel: "icon", url: "/logo/logo-32.png", sizes: "32x32" },
+    { rel: "icon", url: "/logo/logo.png", sizes: "64x64" },
+    { rel: "icon", url: "/logo/logo-128.png", sizes: "128x128" },
+    { rel: "icon", url: "/logo/logo-256.png", sizes: "256x256" },
+    { rel: "icon", url: "/logo/logo-512.png", sizes: "512x512" },
+
+    { rel: "apple-touch-icon", url: "/logo/logo-180.png", sizes: "180x180" },
+  ],
 }
 
 export default function RootLayout({

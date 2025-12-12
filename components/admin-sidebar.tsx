@@ -24,6 +24,7 @@ import { doc, getDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { useRouter } from "next/navigation"
 import { useNotifications } from "@/lib/NotificationContext"
+import Image from "next/image"
 
 interface SidebarProps {
   className?: string
@@ -108,16 +109,20 @@ export function AdminSidebar({ className }: SidebarProps) {
           "flex items-center space-x-2",
           collapsed && "justify-center"
         )}>
-          <div className="bg-secondary text-black p-1.5 rounded-lg">
-            <Eye className="h-5 w-5" />
-          </div>
+           <Image
+              src="/logo/Logo.png"
+              alt="Logo"
+              width={40}
+              height={40}
+              className="bg-secondary-500 rounded-full "
+            />
           {!collapsed && <span className="text-lg font-bold">OccupEye</span>}
         </Link>
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={() => setCollapsed(!collapsed)}
-          className="text-white hover:bg-primary-700"
+          className="text-white hover:bg-primary-100"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>

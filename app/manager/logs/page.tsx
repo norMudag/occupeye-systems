@@ -39,13 +39,10 @@ export default function ManagerRfidLogs() {
   
   // Get the global RFID service
   const { 
-    isListening, 
-    status: rfidReaderStatus, 
-    toggleListening, 
-    currentBuffer, 
-    clearBuffer,
+
     lastScanResult 
   } = useRfidService();
+
 
   // Add state for user ID
   const [userId, setUserId] = useState("");
