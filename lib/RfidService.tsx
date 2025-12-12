@@ -1,7 +1,5 @@
 "use client";
 
-//cant read "RFID" in kiosk mode
-
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { toast } from 'sonner';
 import useRfidReader from '@/hooks/useRfidReader';
