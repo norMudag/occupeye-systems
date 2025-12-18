@@ -26,6 +26,7 @@ import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Toolti
 import RegistrationModal from '@/components/admin-components/registrationModal'
 import EditUserModal from "@/components/admin-components/editUserModal"
 import DeleteUserModal from "@/components/admin-components/deleteUserModal"
+import {DashboardStatsCard} from "@/components/admin-components/card/dashboardStats"
 
 // Room form type
 interface RoomForm {
@@ -234,47 +235,25 @@ export default function AdminDashboard() {
       {/* Dashboard Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {/* Total Users */}
-        <Card>
-          <CardHeader className="pb-2 pt-3">
-            <CardTitle className="text-base flex items-center">
-              <Users className="h-4 w-4 mr-2 text-primary" />
-              Total Users
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsers}</div>
-            <p className="text-xs text-gray-500">{stats.studentCount} students, {stats.staffCount} staff</p>
-          </CardContent>
-        </Card>
+            <DashboardStatsCard
+          title="Total Users"
+          value={stats.totalUsers}
+          subtitle={`${stats.studentCount} students, ${stats.staffCount} staff`}
+          icon={Users}
+        />
+             <DashboardStatsCard
+          title="  Room Status"
+          value={stats.totalRooms}
+          subtitle={`${stats.maintenanceRooms} maintenance, , ${stats.activeRooms} active`}
+          icon={Building}
+        />
 
-        {/* Room Status */}
-        <Card>
-          <CardHeader className="pb-2 pt-3">
-            <CardTitle className="text-base flex items-center">
-              <Building className="h-4 w-4 mr-2 text-primary" />
-              Room Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalRooms}</div>
-            <p className="text-xs text-gray-500">{stats.maintenanceRooms} maintenance, {stats.activeRooms} active</p>
-          </CardContent>
-        </Card>
-
-        {/* RFID Events Today */}
-        <Card>
-          <CardHeader className="pb-2 pt-3">
-            <CardTitle className="text-base flex items-center">
-              <Activity className="h-4 w-4 mr-2 text-primary" />
-              RFID Events Today
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.rfidEventsToday}</div>
-            <p className="text-xs text-gray-500">{stats.entriesCount} entries, {stats.exitsCount} exits</p>
-          </CardContent>
-        </Card>
-
+             <DashboardStatsCard
+          title="RFID Events Today"
+          value={stats.rfidEventsToday}
+          subtitle={`${stats.entriesCount} entries, ${stats.exitsCount} exits`}
+          icon={Activity}
+        />
         {/* System Health */}
         <Card>
           <CardHeader className="pb-2 pt-3">
@@ -288,6 +267,7 @@ export default function AdminDashboard() {
             <p className="text-xs text-gray-500">All systems operational</p>
           </CardContent>
         </Card>
+
       </div>
 
       {/* Main Tabs */}
