@@ -174,7 +174,6 @@ export default function DormRoomsPage() {
         capacity: roomForm.capacity,
         status: roomForm.status,
         rfidEnabled: roomForm.rfidEnabled,
-        currentOccupants: 0,
         availableRooms: roomForm.capacity
       }
       
@@ -418,6 +417,11 @@ export default function DormRoomsPage() {
               <div>
                 <p className="text-sm font-medium text-amber-600">Total Capacity</p>
                 <h3 className="text-3xl font-bold text-amber-900 mt-1">
+                  {rooms.reduce(
+                    (acc, room) => acc + (room.occupantIds?.length ?? 0),
+                    0
+                  )}{" "}
+                  /{" "}
                   {rooms.reduce((acc, room) => acc + room.capacity, 0)}
                 </h3>
               </div>
@@ -532,9 +536,7 @@ export default function DormRoomsPage() {
                       </TableCell>
                       <TableCell>{room.capacity}</TableCell>
                       <TableCell>
-                        {typeof room.currentOccupants === 'number' ? 
-                          `${room.currentOccupants}/${room.capacity}` : 
-                          '0/0'}
+                        {`${room.occupantIds?.length ?? 0}/${room.capacity}`}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center">

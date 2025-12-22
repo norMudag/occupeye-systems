@@ -226,7 +226,7 @@ export const deleteUser = async (userId: string): Promise<boolean> => {
   }
 };
 
-// Get all rooms
+// Get all rooms - Sorted 01-10
 export const getRooms = async (building?: string): Promise<Room[]> => {
   try {
     let roomsQuery;
@@ -238,7 +238,7 @@ export const getRooms = async (building?: string): Promise<Room[]> => {
     
     const roomsSnap = await getDocs(roomsQuery);
     
-    return roomsSnap.docs.map(doc => {
+    const rooms = roomsSnap.docs.map(doc => {
       const data = doc.data();
       return { 
         id: doc.id,
@@ -254,6 +254,12 @@ export const getRooms = async (building?: string): Promise<Room[]> => {
         occupantIds: data.occupantIds || [],
       } as Room;
     });
+
+    // Sort ascending: "01", "02" ... "10"
+    return rooms.sort((a, b) => 
+      a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
+    );
+
   } catch (error) {
     console.error("Error getting rooms:", error);
     return [];
@@ -1090,13 +1096,13 @@ export const getRfidActivityData = async (timeRange: 'today' | 'week' | 'month' 
   }
 };
 
-// Get rooms by dorm name
+// Get rooms by dorm name - Sorted 01-10
 export const getRoomsByDormName = async (dormName: string): Promise<Room[]> => {
   try {
     const roomsQuery = query(collection(db, 'rooms'), where('dormName', '==', dormName));
     const roomsSnap = await getDocs(roomsQuery);
     
-    return roomsSnap.docs.map(doc => {
+    const rooms = roomsSnap.docs.map(doc => {
       const data = doc.data();
       return { 
         id: doc.id,
@@ -1112,6 +1118,12 @@ export const getRoomsByDormName = async (dormName: string): Promise<Room[]> => {
         occupantIds: data.occupantIds || [],
       } as Room;
     });
+
+    // Sort ascending: "01", "02" ... "10"
+    return rooms.sort((a, b) => 
+      a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
+    );
+    
   } catch (error) {
     console.error(`Error getting rooms for dorm ${dormName}:`, error);
     return [];
