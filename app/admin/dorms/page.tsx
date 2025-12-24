@@ -129,11 +129,11 @@ export default function DormManagement() {
   // Helper function to get variant for status badge
   const getStatusVariant = (status: string) => {
     switch (status) {
-      case 'active':
+      case 'vacant':
         return 'emerald';
       case 'maintenance':
         return 'amber';
-      case 'inactive':
+      case 'full':
         return 'rose';
       default:
         return 'default';
@@ -253,7 +253,7 @@ export default function DormManagement() {
                   )}
                   <div className="absolute top-3 right-3 z-20 flex gap-2">
                     <Badge className={`px-3 py-1.5 font-medium rounded-full ${
-                    dorm.status === 'active' 
+                    dorm.status === 'vacant' 
                       ? 'bg-emerald-500 text-white' 
                       : dorm.status === 'maintenance' 
                         ? 'bg-amber-400 text-amber-900' 

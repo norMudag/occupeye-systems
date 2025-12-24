@@ -31,7 +31,7 @@ export default function AddDorm() {
     name: "",
     description: "",
     location: "",
-    status: "active",
+    status: "vacant",
     capacity: 0, // Keep this field to match the Dorm interface, but set it to 0
     roomCount: 0,
     occupancyRate: 0,
@@ -256,9 +256,9 @@ export default function AddDorm() {
                         <SelectValue placeholder="Select status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="vacant">Vacant</SelectItem>
                         <SelectItem value="maintenance">Maintenance</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="full">Full</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

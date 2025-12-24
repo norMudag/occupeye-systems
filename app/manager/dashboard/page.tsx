@@ -302,8 +302,8 @@ export default function ManagerDashboard() {
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-primary">Your Dormitory Dashboard</h1>
-            <p className="text-gray-600 mt-2">Manage applications and monitor occupancy for your assigned dormitory</p>
+            <h1 className="text-3xl font-bold text-primary">Manager Dormitory Dashboard</h1>
+            <p className="text-gray-600 mt-2">Manage applications and monitor occupancy in your assigned dormitory</p>
           </div>
           <div className="flex items-center gap-4">
             {!isLoading && lastUpdated && (
@@ -336,7 +336,7 @@ export default function ManagerDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-warning">{dashboardStats.pendingCount}</div>
-              <p className="text-xs text-muted-foreground">Awaiting your review in this dormitory</p>
+              <p className="text-xs text-muted-foreground">Awaiting application in this dormitory</p>
             </CardContent>
           </Card>
 
@@ -351,7 +351,7 @@ export default function ManagerDashboard() {
                 {dashboardStats.semesterApproved} approved, {dashboardStats.semesterPending} pending
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {currentSemester} • Your dormitory only
+                {currentSemester} • MSU
               </p>
             </CardContent>
           </Card>
@@ -373,7 +373,7 @@ export default function ManagerDashboard() {
                       : "bg-muted [&>div]:bg-success"
                 }`}
               />
-              <p className="text-xs text-muted-foreground mt-2">Based on room capacity in your dormitory</p>
+              <p className="text-xs text-muted-foreground mt-2">Based on room occupants in your dormitory</p>
             </CardContent>
           </Card>
 
@@ -384,9 +384,9 @@ export default function ManagerDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{dashboardStats.activeStudents}</div>
-              <p className="text-xs text-muted-foreground">Currently housed in your dormitory</p>
+              <p className="text-xs text-muted-foreground">Currently residents in your dormitory</p>
               <p className="text-xs text-muted-foreground mt-1">
-                {dashboardStats.activeStudents > 0 ? `Live data from Firestore` : 'No residents found'}
+                {dashboardStats.activeStudents > 0 ? `` : 'No residents found'}
               </p>
             </CardContent>
           </Card>

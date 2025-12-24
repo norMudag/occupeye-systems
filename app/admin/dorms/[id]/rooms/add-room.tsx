@@ -79,6 +79,7 @@ export default function AddRoom({ dormId, dormName, onSuccess, onCancel }: AddRo
 
       const roomData: Omit<Room, 'id'> = {
         name: formData.name,
+        building: formData.name,
         dormId: dormId,
         dormName: dormName,
         capacity: formData.capacity,

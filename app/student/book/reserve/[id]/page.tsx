@@ -71,7 +71,7 @@ export default function ApplyForDormRoom() {
           return
         }
         
-        if (dormData.status !== "active") {
+        if (dormData.status !== "vacant") {
           toast({
             title: "Dormitory Unavailable",
             description: "This dormitory is not currently accepting applications",

@@ -503,7 +503,7 @@ export const updateReservationStatus = async (
   reservationId: string, 
   status: 'approved' | 'denied', 
   managerId: string,
-  rfidCardnumber:string
+  rfidCardnumber?:string
 
 
 ): Promise<boolean> => {

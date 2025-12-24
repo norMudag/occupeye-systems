@@ -38,7 +38,7 @@ export default function EditDorm({ params }: { params: { id: string } }) {
   const [formData, setFormData] = useState({
     name: "",
     location: "",
-    status: "active",
+    status: "vacant",
     imageUrl: "",
     sex: "" // Add sex field
   })
@@ -225,9 +225,9 @@ export default function EditDorm({ params }: { params: { id: string } }) {
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="vacant">Vacant</SelectItem>
                       <SelectItem value="maintenance">Maintenance</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
+                      <SelectItem value="full">Full</SelectItem>
                     </SelectContent>
                   </Select>
               </div>
