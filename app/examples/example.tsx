@@ -332,6 +332,5 @@ export default function Examples() {
           </div>
         </div> */}
       </div>
-    </div>
-  )
+  );
 } 
