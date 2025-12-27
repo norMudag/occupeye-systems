@@ -16,7 +16,7 @@ import {
 import { db } from '@/lib/firebase';
 
 
-// User data interface
+// User data interface too hard naman po
 export interface User {
   id: string;
   firstName: string;

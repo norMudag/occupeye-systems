@@ -27,7 +27,7 @@ export default function AdminLayout({
     }
   }, [currentUser, userData, loading])
 
-  // Show nothing while checking authorization
+  // Show nothing while checking authorization, grabe naman po ikaw
   if (loading || isAuthorized === null) {
     return (
       <div className="flex h-screen w-full items-center justify-center">

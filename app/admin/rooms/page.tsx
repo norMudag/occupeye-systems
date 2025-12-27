@@ -686,7 +686,7 @@ export default function RoomManagement() {
         </Dialog>
       )}
 
-      {/* Delete Room Confirmation Dialog */}
+      {/* Delete Room Confirmation Dialog 700 ba naman */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
