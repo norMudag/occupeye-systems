@@ -8,14 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Bell, CheckCircle, Clock, AlertCircle, Trash2, BookMarkedIcon as MarkAsUnread, Users, Building, Shield } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { getAuth } from "firebase/auth"
-import {
-  ManagerNotification,
-  getManagerNotifications,
-  markNotificationAsRead,
-  markNotificationAsUnread,
-  deleteNotification,
-  markAllNotificationsAsRead
-} from "@/app/utils/notification-firestore"
+import { ManagerNotification, getManagerNotifications, markNotificationAsRead, markNotificationAsUnread, deleteNotification, markAllNotificationsAsRead } from "@/app/utils/notification-firestore"
 import { useNotifications } from "@/lib/NotificationContext"
 
 export default function AdminNotifications() {

@@ -8,25 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Users, Search, Plus, Edit, Trash2, Settings, RefreshCw, X, ChevronLeft, ChevronRight } from "lucide-react"
-import { 
-  getUsers, 
-  User,
-  updateUser,
-  deleteUser,
-  generateStudentId,
-  generateManagerId
-} from "@/app/utils/admin-firestore"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { getUsers, User, updateUser, deleteUser, generateStudentId, generateManagerId } from "@/app/utils/admin-firestore"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
-import { auth } from "@/lib/firebase"
 import { Checkbox } from "@/components/ui/checkbox"
 
 export default function UserManagement() {

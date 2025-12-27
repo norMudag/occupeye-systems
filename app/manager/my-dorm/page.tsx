@@ -9,21 +9,9 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TrendingUp, Users, AlertCircle, Search, Settings, User, Eye } from "lucide-react"
 import Navigation from "@/components/navigation"
-import { 
-  getRoomsByManagerDorm,
-  Room,
-} from "@/app/utils/manager-firestore"
-import { 
-  getUsersByIds
-} from "@/app/utils/admin-firestore"
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from "@/components/ui/dialog"
+import { getRoomsByManagerDorm, Room } from "@/app/utils/manager-firestore"
+import { getUsersByIds } from "@/app/utils/admin-firestore"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import TenantProfileModal from "@/app/components/tenant-profile-modal"
 
 // User information interface

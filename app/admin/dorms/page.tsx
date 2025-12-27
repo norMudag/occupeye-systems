@@ -6,37 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Building, Search, Plus, Edit, Trash2, Users, MapPin, Home } from "lucide-react"
-import { 
-  getDorms, 
-  getUsers,
-  Dorm,
-  User,
-  deleteDorm,
-  getDormById
-} from "@/app/utils/admin-firestore"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
+import { getDorms, getUsers, Dorm, User, deleteDorm, getDormById } from "@/app/utils/admin-firestore"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import Link from "next/link"
-import Image from "next/image"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 
 export default function DormManagement() {
   const router = useRouter()

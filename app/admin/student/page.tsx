@@ -3,10 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Users, Search, Plus, Edit, Trash2 } from "lucide-react"
-import { toast } from "sonner"
 import { getUsers, User, getRooms, Room } from "@/app/utils/admin-firestore";
-import { Badge } from "@/components/ui/badge";
 
 export default function AdminStudentList() {
   const [students, setStudents] = useState<User[]>([]);

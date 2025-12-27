@@ -7,12 +7,8 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Activity, Search, RefreshCw, DoorOpen, Calendar, Clock, User, Building, TrendingUp, CreditCard, Scan, CheckCircle } from "lucide-react"
-import { 
-  getRfidLogs, 
-  RfidLog
-} from "@/app/utils/admin-firestore"
+import { getRfidLogs, RfidLog } from "@/app/utils/admin-firestore"
 import { toast } from "sonner"
 import { useRfidService } from "@/lib/RfidService"
 

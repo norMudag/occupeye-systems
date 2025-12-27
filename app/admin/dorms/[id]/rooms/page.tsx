@@ -8,39 +8,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Building, Search, Plus, Edit, Trash2, ArrowLeft, Wifi, Users } from "lucide-react"
-import { 
-  getDormById, 
-  createRoom,
-  getRooms,
-  Dorm,
-  Room,
-  updateRoom,
-  deleteRoom,
-  getRoomsByDormName
-} from "@/app/utils/admin-firestore"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { getDormById, createRoom, getRooms, Dorm, Room, updateRoom, deleteRoom, getRoomsByDormName } from "@/app/utils/admin-firestore"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import AddRoom from "./add-room"
 
 // Room form type

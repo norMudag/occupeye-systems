@@ -9,18 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select"
 import { Users, Building, Activity, Shield, Search, Plus, Edit, Trash2, Settings, X, RefreshCw } from "lucide-react"
-import {
-  getUsers,
-  getRooms,
-  getRfidLogs,
-  getDashboardStats,
-  User,
-  Room as AdminRoom,
-  RfidLog,
-  DashboardStats,
-  getRfidActivityData
-} from "@/app/utils/admin-firestore"
-
+import { getUsers, getRooms, getRfidLogs, getDashboardStats, User, Room as AdminRoom, RfidLog, DashboardStats, getRfidActivityData } from "@/app/utils/admin-firestore"
 import { StatusDistributionChart, RFIDActivityChart } from "@/components/charts/DashboardCharts"
 import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Cell } from 'recharts'
 import RegistrationModal from '@/components/admin-components/registrationModal'
@@ -72,8 +61,6 @@ export default function AdminDashboard() {
   const [userRoleFilter, setUserRoleFilter] = useState('all')
   const [rfidActionFilter, setRfidActionFilter] = useState('all')
 
-
-
   // Room creation modal state
   const [roomModalOpen, setRoomModalOpen] = useState(false)
   const [roomLoading, setRoomLoading] = useState(false)
@@ -85,11 +72,9 @@ export default function AdminDashboard() {
     rfidEnabled: false
   })
 
-
   // User edit modal state
   const [editUserForm, setEditUserForm] = useState<User | null>(null)
   // User delete confirmation
-
 
   // Fetch data on component mount
   useEffect(() => {
@@ -99,7 +84,6 @@ export default function AdminDashboard() {
         // Get dashboard stats
         const dashboardStats = await getDashboardStats()
         setStats(dashboardStats)
-
         
         // Get all users
         const allUsers = await getUsers()

@@ -8,12 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ArrowLeft, Building, Users, Wifi, CheckCircle, XCircle, User } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { 
-  getRoomById,
-  getUsersByIds,
-  Room,
-  User as UserType
-} from "@/app/utils/admin-firestore"
+import { getRoomById, getUsersByIds, Room, User as UserType } from "@/app/utils/admin-firestore"
 import { Progress } from "@/components/ui/progress"
 import Link from "next/link"
 
