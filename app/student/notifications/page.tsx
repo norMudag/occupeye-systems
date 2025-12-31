@@ -9,14 +9,7 @@ import { Bell, CheckCircle, Clock, AlertCircle, Trash2, BookMarkedIcon as MarkAs
 import Navigation from "@/components/navigation"
 import { useToast } from "@/components/ui/use-toast"
 import { getAuth } from "firebase/auth"
-import { 
-  StudentNotification, 
-  getStudentNotifications, 
-  markNotificationAsRead,
-  markNotificationAsUnread,
-  deleteNotification,
-  markAllNotificationsAsRead
-} from "@/app/utils/notification-firestore"
+import { StudentNotification, getStudentNotifications, markNotificationAsRead, markNotificationAsUnread, deleteNotification, markAllNotificationsAsRead } from "@/app/utils/notification-firestore"
 import { useNotifications } from "@/lib/NotificationContext"
 
 export default function StudentNotifications() {

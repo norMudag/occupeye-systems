@@ -10,12 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Clock, Search, X } from "lucide-react"
 import Navigation from "@/components/navigation"
-import { 
-  getAllReservations,
-  getAllDormitories,
-  getAllSemesters,
-  Reservation
-} from "@/app/utils/manager-firestore"
+import { getAllReservations, getAllDormitories, getAllSemesters, Reservation } from "@/app/utils/manager-firestore"
 import { auth } from "@/lib/firebase"
 import { useAuthState } from 'react-firebase-hooks/auth'
 

@@ -9,26 +9,10 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CheckCircle, XCircle, Clock, Search, Eye, Building } from "lucide-react"
 import Navigation from "@/components/navigation"
-import { 
-  getPendingReservations, 
-  getPendingReservationsByDorm,
-  updateReservationStatus,
-  getSemesterReservationStats,
-  Reservation,
-  getAvailableRoomsByBuilding,
-  Room,
-  assignRoomToReservation
-} from "@/app/utils/manager-firestore"
+import { getPendingReservations, getPendingReservationsByDorm, updateReservationStatus, getSemesterReservationStats, Reservation, getAvailableRoomsByBuilding, Room, assignRoomToReservation } from "@/app/utils/manager-firestore"
 import { auth } from "@/lib/firebase"
 import { useAuthState } from 'react-firebase-hooks/auth'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { getAdminUserIds, notifyAdminRoomAssignment } from "@/app/utils/notification-firestore"
 import { doc, getDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"

@@ -11,12 +11,7 @@ import Navigation from "@/components/navigation"
 import Link from "next/link"
 import { auth } from "@/lib/firebase"
 import { useAuthState } from 'react-firebase-hooks/auth'
-import { 
-  getUserReservations, 
-  getMonthlyReservationCount,
-  getMonthlyHoursUsed, 
-  Reservation
-} from "@/app/utils/student-firestore"
+import { getUserReservations, getMonthlyReservationCount, getMonthlyHoursUsed, Reservation } from "@/app/utils/student-firestore"
 
 export default function StudentReservations() {
   const [user] = useAuthState(auth)

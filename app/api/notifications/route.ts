@@ -1,16 +1,5 @@
 import { NextResponse } from 'next/server';
-import { 
-  createStudentNotification, 
-  createManagerNotification,
-  notifyAllManagers,
-  notifyBuildingManagers,
-  createReservationRequestNotification,
-  notifyReservationApproved,
-  notifyReservationRejected,
-  notifyRoomMaintenance,
-  notifyHighOccupancy,
-  notifyRfidAccess
-} from '@/app/utils/notification-service';
+import { createStudentNotification, createManagerNotification, notifyAllManagers, notifyBuildingManagers, createReservationRequestNotification, notifyReservationApproved, notifyReservationRejected, notifyRoomMaintenance, notifyHighOccupancy, notifyRfidAccess } from '@/app/utils/notification-service';
 
 export async function POST(request: Request) {
   try {

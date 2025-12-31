@@ -9,24 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Progress } from "@/components/ui/progress"
 import { CheckCircle, XCircle, Clock, TrendingUp, Calendar, Users, Building, RefreshCw } from "lucide-react"
 import Navigation from "@/components/navigation"
-import { 
-  getPendingReservations, 
-  getRecentReservations,
-  getBuildingsStatus, 
-  getManagerDashboardStats, 
-  getManagerDashboardStatsByDorm,
-  updateReservationStatus,
-  Reservation,
-  BuildingStatus,
-  getCurrentSemester,
-  getReservationAnalytics,
-  getRFIDActivityData,
-  // Import the dorm-filtered functions
-  getPendingReservationsByDorm,
-  getRecentReservationsByDorm,
-  getReservationAnalyticsByDorm,
-  getRFIDActivityDataByDorm
-} from "@/app/utils/manager-firestore"
+import { getPendingReservations, getRecentReservations, getBuildingsStatus, getManagerDashboardStats, getManagerDashboardStatsByDorm, updateReservationStatus, Reservation, BuildingStatus, getCurrentSemester, getReservationAnalytics, getRFIDActivityData, getPendingReservationsByDorm, getRecentReservationsByDorm, getReservationAnalyticsByDorm, getRFIDActivityDataByDorm } from "@/app/utils/manager-firestore"
 import { useAuth } from "@/lib/AuthContext"
 import { auth } from "@/lib/firebase"
 import { useAuthState } from 'react-firebase-hooks/auth'
