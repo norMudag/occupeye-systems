@@ -5,16 +5,9 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import { Eye, Home, Calendar, Users, Building, Settings, Bell, LogOut, Activity, Shield } from "lucide-react"
+import { Home, Calendar, Users, Building, Settings, Bell, LogOut, Activity, Shield } from "lucide-react"
 import { useAuth } from "@/lib/AuthContext"
 import { doc, getDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"

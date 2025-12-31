@@ -4,18 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { 
-  Home, 
-  Users, 
-  Building, 
-  Activity, 
-  ChevronLeft, 
-  ChevronRight,
-  Eye,
-  Settings,
-  LogOut,
-  Bell
-} from "lucide-react"
+import { Home, Users, Building, Activity, ChevronLeft, ChevronRight, Settings, LogOut, Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/AuthContext"
 import { RfidStatusIndicator } from "@/components/rfid-status-indicator"
