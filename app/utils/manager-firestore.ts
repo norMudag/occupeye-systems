@@ -1,18 +1,4 @@
-import { 
-  collection, 
-  query, 
-  where, 
-  getDocs, 
-  getDoc,
-  doc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  Timestamp,
-  orderBy,
-  limit,
-  serverTimestamp
-} from 'firebase/firestore';
+import { collection, query, where, getDocs,  getDoc, doc, addDoc, updateDoc, deleteDoc, Timestamp, orderBy, limit, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { getAuth } from 'firebase/auth';
 import { getDormById } from './admin-firestore';

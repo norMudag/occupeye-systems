@@ -1,16 +1,4 @@
-import { 
-  collection, 
-  query, 
-  where, 
-  getDocs, 
-  getDoc,
-  doc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  Timestamp,
-  orderBy
-} from 'firebase/firestore';
+import { collection, query, where, getDocs, getDoc, doc, addDoc, updateDoc, deleteDoc, Timestamp, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 // Room data interface

@@ -1,20 +1,5 @@
-import { 
-  collection, 
-  query, 
-  where, 
-  getDocs, 
-  getDoc,
-  doc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  Timestamp,
-  orderBy,
-  limit,
-  setDoc
-} from 'firebase/firestore';
+import { collection, query, where, getDocs, getDoc, doc, addDoc, updateDoc, deleteDoc, Timestamp, orderBy, limit, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-
 
 // User data interface too hard naman po
 export interface User {

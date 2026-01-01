@@ -2,7 +2,6 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -13,7 +12,6 @@ import { useParams, useRouter } from "next/navigation"
 import { auth, db } from "@/lib/firebase"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { getReservationById, type Reservation } from "@/app/utils/manager-firestore"
-
 import { useToast } from "@/components/ui/use-toast"
 import { doc, getDoc } from "firebase/firestore"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"

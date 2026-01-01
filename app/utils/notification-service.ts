@@ -1,12 +1,4 @@
-import { 
-  collection, 
-  addDoc, 
-  serverTimestamp,
-  query,
-  where,
-  getDocs,
-  Timestamp
-} from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { StudentNotification, ManagerNotification } from './notification-firestore';
 
