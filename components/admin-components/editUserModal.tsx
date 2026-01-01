@@ -2,19 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components//ui/label';
 import { Input } from '@/components/ui/input';
-import {
-  getUsers,
-  getDashboardStats,
-  generateStudentId,
-  generateManagerId,
-  User,
-  Room as AdminRoom,
-  DashboardStats,
-  getRooms,
-  updateRoom,
-  updateUser,
-
-} from "@/app/utils/admin-firestore"
+import { getUsers, getDashboardStats, generateStudentId, generateManagerId, User, Room as AdminRoom, DashboardStats, getRooms, updateRoom, updateUser } from "@/app/utils/admin-firestore"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '../ui/checkbox';
 import { Button } from '../ui/button';
@@ -22,9 +10,6 @@ import { doc, setDoc } from "firebase/firestore"
 import { auth, db } from "@/lib/firebase"
 import { createUserWithEmailAndPassword } from '@firebase/auth';
 import { toast } from 'sonner';
-
-
-
 
   const availableBuildings = [
     "Princess Lawanen Hall - North Wings",
