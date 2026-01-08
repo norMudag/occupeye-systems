@@ -511,7 +511,9 @@ export default function DormRoomsPage() {
                       </TableCell>
                       <TableCell>{room.capacity}</TableCell>
                       <TableCell>
-                        {`${room.occupantIds?.length ?? 0}/${room.capacity}`}
+                        {`${room.status === "occupied"
+                        ? `${room.capacity}/${room.capacity}`
+                        : `${room.occupantIds?.length ?? 0}/${room.capacity}`}`}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center">

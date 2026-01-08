@@ -75,47 +75,53 @@ export default function ManagerMyDorm() {
   const currentAcademicPeriod = getCurrentAcademicPeriod()
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true)
-      try {
-        // Get rooms for manager's dormitory with optional status filter
-        const roomsData = await getRoomsByManagerDorm(statusFilter !== "all" ? statusFilter : undefined)
-        setDetailedRooms(roomsData)
-        
-        // Get dorm name from the first room (all rooms should have the same dormName)
-        if (roomsData.length > 0 && roomsData[0].dormName) {
-          setDormName(roomsData[0].dormName)
-        }
-        
-        // Calculate overall stats
-        const totalRooms = roomsData.length
-        
-        // Count rooms as occupied if they have at least one occupant
-        const totalOccupied = roomsData.filter(room => room.currentOccupants > 0).length
-        
-        // A room is available if it has no occupants and is not in maintenance
-        const totalAvailable = roomsData.filter(room => room.currentOccupants === 0 && room.status !== "maintenance").length
-        
-        // Calculate occupancy based on total residents vs total capacity
-        const totalOccupants = roomsData.reduce((sum, room) => sum + room.currentOccupants, 0)
-        const totalCapacity = roomsData.reduce((sum, room) => sum + room.capacity, 0)
-        const overallOccupancy = totalCapacity > 0 ? Math.round((totalOccupants / totalCapacity) * 100) : 0
-        
-        setOverallStats({
-          totalRooms,
-          totalOccupied,
-          totalAvailable,
-          overallOccupancy
-        })
-      } catch (error) {
-        console.error("Error fetching rooms data:", error)
-      } finally {
-        setIsLoading(false)
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      // Get rooms for manager's dormitory with optional status filter
+      const roomsData = await getRoomsByManagerDorm(statusFilter !== "all" ? statusFilter : undefined);
+      setDetailedRooms(roomsData);
+      
+      // Get dorm name from the first room
+      if (roomsData.length > 0 && roomsData[0].dormName) {
+        setDormName(roomsData[0].dormName);
       }
+      
+      const totalRooms = roomsData.length;
+      
+      // Count as occupied if status is "occupied" OR currentOccupants > 0
+      const totalOccupied = roomsData.filter(room => 
+        room.status === "occupied" || room.currentOccupants > 0
+      ).length;
+      
+      // A room is available ONLY if status is "available" AND occupants are 0
+      const totalAvailable = roomsData.filter(room => 
+        room.status === "available" && room.currentOccupants === 0
+      ).length;
+      
+      // Calculate virtual occupancy: treat "occupied" status rooms as 100% full (using their capacity)
+      const virtualOccupants = roomsData.reduce((sum, room) => {
+        return sum + (room.status === "occupied" ? room.capacity : room.currentOccupants);
+      }, 0);
+      
+      const totalCapacity = roomsData.reduce((sum, room) => sum + room.capacity, 0);
+      const overallOccupancy = totalCapacity > 0 ? Math.round((virtualOccupants / totalCapacity) * 100) : 0;
+      
+      setOverallStats({
+        totalRooms,
+        totalOccupied,
+        totalAvailable,
+        overallOccupancy
+      });
+    } catch (error) {
+      console.error("Error fetching rooms data:", error);
+    } finally {
+      setIsLoading(false);
     }
-    
-    fetchData()
-  }, [statusFilter])
+  };
+  
+  fetchData();
+}, [statusFilter]);
 
   const filteredRooms = detailedRooms.filter((room) => {
     const matchesSearch =
@@ -266,17 +272,23 @@ export default function ManagerMyDorm() {
               </Select>
             </div>
             {isLoading ? (
-              <div className="text-center py-8">
-                <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading room data...</p>
-              </div>
-            ) : filteredRooms.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-gray-600">No rooms match your search criteria.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredRooms.map((room) => (
+            <div className="text-center py-8">
+              <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading room data...</p>
+            </div>
+          ) : filteredRooms.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-600">No rooms match your search criteria.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredRooms.map((room) => {
+                // Determine virtual values for display
+                const isOccupiedStatus = room.status === "occupied";
+                const displayCurrent = isOccupiedStatus ? room.capacity : room.currentOccupants;
+                const displayPercentage = Math.round((displayCurrent / room.capacity) * 100) || 0;
+
+                return (
                   <div key={room.id} className="p-6 border border-secondary/20 rounded-lg">
                     <div className="flex items-center justify-between mb-4">
                       <div>
@@ -289,20 +301,19 @@ export default function ManagerMyDorm() {
                         className={
                           room.status === "maintenance"
                             ? "bg-destructive text-white"
-                            : room.currentOccupants >= room.capacity
-                            ? "bg-warning text-white"
-                              : room.currentOccupants > 0
-                                ? "bg-primary text-white"
-                              : "bg-success text-white"
+                            : isOccupiedStatus 
+                              ? "bg-rose-500 text-white" 
+                              : room.currentOccupants >= room.capacity
+                                ? "bg-warning text-white"
+                                : room.currentOccupants > 0
+                                  ? "bg-primary text-white"
+                                  : "bg-success text-white"
                         }
                       >
-                        {room.status === "maintenance"
-                            ? "Maintenance"
-                          : room.currentOccupants >= room.capacity
-                            ? "Full"
-                            : room.currentOccupants > 0
-                              ? "Partially Occupied"
-                            : "Available"}
+                        {room.status === "maintenance" ? "Maintenance" : 
+                        isOccupiedStatus ? "Occupied" : 
+                        room.currentOccupants >= room.capacity ? "Full" : 
+                        room.currentOccupants > 0 ? "Partially Occupied" : "Available"}
                       </Badge>
                     </div>
 
@@ -314,13 +325,12 @@ export default function ManagerMyDorm() {
                       <div>
                         <div className="text-sm text-gray-600">Current Residents</div>
                         <div className={`text-lg font-semibold ${
-                          room.currentOccupants >= room.capacity ? "text-warning" : 
+                          isOccupiedStatus || room.currentOccupants >= room.capacity ? "text-warning" : 
                           room.currentOccupants > 0 ? "text-primary" : ""
                         }`}>
-                          {room.currentOccupants} / {room.capacity}
-                          {room.currentOccupants >= room.capacity && " (Full)"}
-                          {room.currentOccupants > 0 && room.currentOccupants < room.capacity && " (Partial)"}
-                          {room.currentOccupants === 0 && " (Empty)"}
+                          {displayCurrent} / {room.capacity}
+                          {isOccupiedStatus || room.currentOccupants >= room.capacity ? " (Full)" : 
+                          room.currentOccupants > 0 ? " (Partial)" : " (Empty)"}
                         </div>
                       </div>
                     </div>
@@ -328,12 +338,12 @@ export default function ManagerMyDorm() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>Occupancy</span>
-                        <span>{Math.round((room.currentOccupants / room.capacity) * 100) || 0}%</span>
+                        <span>{displayPercentage}%</span>
                       </div>
                       <Progress
-                        value={(room.currentOccupants / room.capacity) * 100 || 0}
+                        value={displayPercentage}
                         className={`h-2 ${
-                          (room.currentOccupants / room.capacity) > 0.8
+                          isOccupiedStatus || (room.currentOccupants / room.capacity) > 0.8
                             ? "bg-muted [&>div]:bg-warning"
                             : (room.currentOccupants / room.capacity) > 0.5
                               ? "bg-muted [&>div]:bg-primary"
@@ -354,9 +364,10 @@ export default function ManagerMyDorm() {
                       </Button>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
+                );
+              })}
+            </div>
+          )}
           </CardContent>
         </Card>
       </main>

@@ -538,12 +538,21 @@ export default function ManagerApprovals() {
                   <SelectValue placeholder="Select a room" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableRooms.map((room) => (
-                    <SelectItem key={room.id} value={room.id}>
-                      Room {room.name} - Capacity: {room.capacity}, Current:{" "}
-                      {room.currentOccupants || 0}
-                    </SelectItem>
-                  ))}
+                  {availableRooms.map((room) => {
+                    // Logic: Disable selection if status is manually set to occupied or maintenance
+                    const isRestricted = room.status === "occupied" || room.status === "maintenance";
+                    const isFull = room.currentOccupants >= room.capacity;
+                    const isDisabled = isRestricted || isFull;
+
+                    return (
+                      <SelectItem key={room.id} value={room.id} disabled={isDisabled}>
+                        Room {room.name} - 
+                        {isRestricted 
+                          ? ` (${room.status.toUpperCase()})` 
+                          : ` Capacity: ${room.capacity}, Current: ${room.currentOccupants || 0}`}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             )}
