@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Eye } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { generateStudentId } from "@/app/utils/admin-firestore"
 import { toast } from "sonner"
@@ -38,7 +37,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [registerPassword, setRegisterPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [sex, setSex] = useState("")
-  const [contactNumber, setContractNumber] = useState("")
   const [registerError, setRegisterError] = useState("")
   const [generatingId, setGeneratingId] = useState(false)
   
@@ -160,7 +158,7 @@ const handleKioksMode = async (email: string,password: string)=>{
   const handleRegister = async () => {
     try {
       // Validate fields
-      if (!firstName || !lastName || !studentId || !registerEmail || !registerPassword || !sex || !contactNumber) {
+      if (!firstName || !lastName || !studentId || !registerEmail || !registerPassword || !sex ) {
         setRegisterError("All fields are required")
         return
       }
@@ -186,8 +184,7 @@ const handleKioksMode = async (email: string,password: string)=>{
         role: "student", // Default role is student
         status: "active",
         academicStatus: "N/A",
-        createdAt: new Date().toISOString(),
-        contactNumber
+        createdAt: new Date().toISOString()
       })
       
       toast.success("Account created successfully! Please log in.")
@@ -196,7 +193,6 @@ const handleKioksMode = async (email: string,password: string)=>{
       setFirstName("")
       setLastName("")
       setSex("") // Reset sex field
-      setContractNumber("")
       
       // Generate a new student ID
       try {
@@ -234,7 +230,6 @@ const handleKioksMode = async (email: string,password: string)=>{
     setRegisterPassword("")
     setConfirmPassword("")
     setSex("")
-    setContractNumber("")
     setRegisterError("")
     onClose()
   }
@@ -339,17 +334,6 @@ const handleKioksMode = async (email: string,password: string)=>{
                         placeholder="Doe"
                       />
                     </div>
-                  </div>
-                  
-
-                  <div className="space-y-2">
-                    <Label htmlFor="contactNumber">Contact</Label>
-                    <Input
-                      id="contactNumber"
-                      value={contactNumber}
-                      onChange={(e)=> setContractNumber(e.target.value)}
-                      placeholder="+639123456789"
-                    />
                   </div>
 
                   <div className="space-y-2">

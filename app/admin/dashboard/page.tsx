@@ -297,7 +297,7 @@ export default function AdminDashboard() {
                     {/* Most Reserved Dorms */}
                     <Card className="border-secondary/20">
                       <CardHeader className="py-2 px-4 border-b border-secondary/20">
-                        <CardTitle className="text-sm font-medium">Dormitory Availability</CardTitle>
+                        <CardTitle className="text-sm font-medium">Room Availability</CardTitle>
                       </CardHeader>
                       <CardContent className="p-4 h-[250px]">
                         <ResponsiveContainer width="100%" height="100%">
