@@ -222,7 +222,7 @@ export default function ViewReservation() {
 
                   <div>
                     <Label className="font-medium">Applied On</Label>
-                    <p className="text-gray-600 mt-1">{new Date(reservation.createdAt).toLocaleString()}</p>
+                    <p className="text-gray-600 mt-1">{new Date(reservation.createdAt).toLocaleDateString()}</p>
                   </div>
 
                   {reservation.status === "approved" && reservation.managerId && (

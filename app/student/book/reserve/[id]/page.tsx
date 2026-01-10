@@ -253,24 +253,28 @@ export default function ApplyForDormRoom() {
                       </Select>
                     </div>
                     
-                    <div className="space-y-2">
-                      <Label htmlFor="academicYear">Academic Year</Label>
-                      <Select
-                        value={application.academicYear}
-                        onValueChange={(value) => setApplication({...application, academicYear: value})}
-                        required
-                      >
-                        <SelectTrigger id="academicYear" className="border-secondary/20">
-                          <SelectValue placeholder="Select academic year" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {academicYears.map((year) => (
-                            <SelectItem key={year} value={year}>{year}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                     <div className="space-y-2">
+                        <Label htmlFor="academicYear">Academic Year</Label>
+                        <Select
+                          value={application.academicYear}
+                          onValueChange={(value) => setApplication({...application, academicYear: value})}
+                          required
+                          disabled
+                        >
+                          <SelectTrigger 
+                            id="academicYear" 
+                            className="border-secondary/20 disabled:opacity-100 [&>svg]:hidden"
+                          >
+                            <SelectValue placeholder="Select academic year" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {academicYears.map((year) => (
+                              <SelectItem key={year} value={year}>{year}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                  </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="purpose">Reason for Application</Label>
