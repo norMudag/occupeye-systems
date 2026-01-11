@@ -16,8 +16,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Extend UserData to include managedBuildings for type safety
 interface ManagerUserData {
-  managedBuildings: string[];
-  managedDormId?: string;
+  managedBuildings?: string[]; // Optional for students
+  managedDormId?: string;      // Optional for students
+  assignedBuilding?: string;   // Add this for students
   [key: string]: any;
 }
 
@@ -231,13 +232,16 @@ export default function StandaloneRfidLogs() {
   };
 
   // ---------- FETCH ----------
+  // ---------- FETCH ----------
   const fetchLogs = async () => {
     setLoading(true);
     try {
       const managedBuildings = userData?.managedBuildings || [];
       let dormNameFetched = "";
 
+      // 1. Identify the dormitory name based on user role
       if (userData?.managedDormId) {
+        // Logged in as Manager
         try {
           const dormData = await getDormById(userData.managedDormId);
           if (dormData) {
@@ -247,27 +251,38 @@ export default function StandaloneRfidLogs() {
         } catch (error) {
           console.error("Error fetching dorm data:", error);
         }
+      } else if (userData?.assignedBuilding) {
+        // Logged in as Student (Kiosk Mode)
+        dormNameFetched = userData.assignedBuilding;
+        setDormName(userData.assignedBuilding);
+      } else if (userData?.building) {
+        // Alternative field for Student dormitory
+        dormNameFetched = userData.building;
+        setDormName(userData.building);
       }
 
-      // ✅ fetch ALL actions (entry + exit) so duration works
+      // 2. Fetch logs using the identified dorm name
       const allLogs = await getRfidLogs({
         limit: 500,
         room: roomFilter !== "all" ? roomFilter : undefined,
         dormName: dormNameFetched,
       });
 
+      // 3. Filter logs to ensure they match the dormitory
       const filteredLogs = allLogs.filter((log) => {
-        if (
-          dormNameFetched &&
-          (log.dormName === dormNameFetched ||
-            log.building === dormNameFetched)
-        ) {
-          return true;
-        }
-        return log.building && managedBuildings.includes(log.building);
+        // Match by dorm name fetched from userData
+        const matchesDorm = dormNameFetched && (
+          log.dormName === dormNameFetched || 
+          log.building === dormNameFetched
+        );
+        
+        // Match by manager's managed buildings list
+        const matchesManaged = log.building && managedBuildings.includes(log.building);
+
+        return matchesDorm || matchesManaged;
       });
 
-      // ✅ apply search if any
+      // 4. Apply search filters if necessary
       if (searchTerm.trim()) {
         const searchTermLower = searchTerm.toLowerCase();
         const searchResults = filteredLogs.filter(

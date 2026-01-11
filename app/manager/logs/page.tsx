@@ -16,8 +16,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Extend UserData to include managedBuildings for type safety
 interface ManagerUserData {
-  managedBuildings: string[];
-  managedDormId?: string;
+  managedBuildings?: string[]; // Optional for students
+  managedDormId?: string;      // Optional for students
+  assignedBuilding?: string;   // Add this for students
   [key: string]: any;
 }
 

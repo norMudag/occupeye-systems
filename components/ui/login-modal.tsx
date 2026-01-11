@@ -71,7 +71,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
   
 const handleKioksMode = async (email: string,password: string)=>{
-
   try{
     setIsLoading(true)
     const logEmail =   email.replace("kioks.mode/", "")
@@ -86,12 +85,13 @@ const handleKioksMode = async (email: string,password: string)=>{
         const userRole = userData.role || "student"
 
          switch (userRole) {
-          case "manager":
-          router.push("/rfid-logs")
-          break
-           default:
-          router.push("/student/reservations")
-      }
+            case "manager":
+            case "student": // Add this line to allow students access
+              router.push("/rfid-logs")
+              break
+            default:
+              router.push("/student/reservations")
+          }
     } else {
       router.push("/student/reservations")
     }
