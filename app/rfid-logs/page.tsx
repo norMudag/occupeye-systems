@@ -38,7 +38,6 @@ export default function StandaloneRfidLogs() {
   const [actionFilter, setActionFilter] = useState('all');
   const [dormName, setDormName] = useState<string>("");
   
-  
   // Get the global RFID service
   const { 
     isListening, 
@@ -51,10 +50,6 @@ export default function StandaloneRfidLogs() {
 
   // Add state for user ID
   const [userId, setUserId] = useState("");
-
-
-  
- 
 
   // Process logs to add duration
   const processLogs = (logsData: RfidLog[]) => {

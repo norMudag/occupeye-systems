@@ -37,20 +37,17 @@ export default function ManagerRfidLogs() {
   const [searchTerm, setSearchTerm] = useState('');
   const [actionFilter, setActionFilter] = useState('all');
   const [dormName, setDormName] = useState<string>("");
-  
+  const [viewMode, setViewMode] = useState<'all' | 'returned' | 'not-returned'>('all');
+  const [notReturnedList, setNotReturnedList] = useState<(RfidLog & { duration: string })[]>([]);
+  const [returnedList, setReturnedList] = useState<(RfidLog & { duration: string })[]>([]);
+
   // Get the global RFID service
   const { 
-
     lastScanResult 
   } = useRfidService();
 
-
   // Add state for user ID
   const [userId, setUserId] = useState("");
-
-
-  
- 
 
   // Process logs to add duration
   const processLogs = (logsData: RfidLog[]) => {
@@ -117,10 +114,55 @@ export default function ManagerRfidLogs() {
     }
   }, [lastScanResult, userData]);
 
-  // Process logs to add duration when logs change
-  useEffect(() => {
-    setProcessedLogs(processLogs(logs));
-  }, [logs]);
+// Updated helper for 1 person per entry
+const getNotReturnedStudents = (allProcessedLogs: (RfidLog & { duration: string })[]) => {
+  const latestStatus: Record<string, (RfidLog & { duration: string })> = {};
+
+  // Sort logs by timestamp oldest to newest so the loop ends with the latest scan
+  const sortedByTime = [...allProcessedLogs].sort((a, b) => 
+    new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+  );
+
+  sortedByTime.forEach(log => {
+    // This overwrites previous scans, leaving only the most recent one for each student
+    latestStatus[log.studentId] = log;
+  });
+
+  // Return only those whose absolute last scan was an 'exit'
+  return Object.values(latestStatus)
+    .filter(log => log.action === 'exit')
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+};
+
+useEffect(() => {
+  const processed = processLogs(logs);
+  setProcessedLogs(processed);
+
+  // Map to store the absolute latest log for each studentId
+  const latestStudentStatus = new Map<string, (RfidLog & { duration: string })>();
+
+  // Sort oldest to newest so the last entry in the map is the current status
+  [...processed]
+    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+    .forEach(log => {
+      latestStudentStatus.set(log.studentId, log);
+    });
+
+  const allLatest = Array.from(latestStudentStatus.values());
+
+  // 1 Person per entry: Last action was 'exit'
+  const currentlyOut = allLatest
+    .filter(log => log.action === 'exit')
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+  // 1 Person per entry: Last action was 'entry'
+  const currentlyIn = allLatest
+    .filter(log => log.action === 'entry')
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+  setNotReturnedList(currentlyOut);
+  setReturnedList(currentlyIn);
+}, [logs]);
 
   // Handle RFID card reading with room ID
   const handleRfidRead = async () => {
@@ -463,6 +505,30 @@ return (
                   </SelectContent>
                 </Select>
 
+                <Button 
+                  variant={viewMode === 'all' ? "default" : "outline"} 
+                  onClick={() => setViewMode('all')}
+                  className="h-10 bg-white shadow-sm"
+                >
+                  Show All Logs
+                </Button>
+
+                <div className="flex bg-gray-100 p-1 rounded-lg border">
+                  <Button 
+                    variant={viewMode === 'returned' ? "secondary" : "ghost"} 
+                    onClick={() => setViewMode('returned')}
+                    className={viewMode === 'returned' ? "bg-white shadow-sm text-green-600" : ""}
+                  >
+                    <LogIn className="mr-2 h-4 w-4" /> Returned ({returnedList.length})
+                  </Button>
+                  <Button 
+                    variant={viewMode === 'not-returned' ? "secondary" : "ghost"} 
+                    onClick={() => setViewMode('not-returned')}
+                    className={viewMode === 'not-returned' ? "bg-white shadow-sm text-red-600" : ""}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" /> Not Returned ({notReturnedList.length})
+                  </Button>
+
                 <Button
                   variant="outline"
                   size="sm"
@@ -474,6 +540,7 @@ return (
                   Refresh
                 </Button>
               </div>
+              </div>
             </div>
           </CardHeader>
 
@@ -483,33 +550,69 @@ return (
                 <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto mb-4"></div>
                 <p className="text-sm text-gray-600">Loading logs...</p>
               </div>
-            ) : logs.length === 0 ? (
-              <div className="text-center py-10 text-gray-600">
-                <Activity className="h-10 w-10 text-gray-400 mx-auto mb-3" />
-                <h3 className="text-lg font-semibold mb-1">No logs found</h3>
-                <p className="text-sm">No logs found for your managed buildings.</p>
-              </div>
             ) : (
               <div className="space-y-6">
-                {/* Latest log */}
-                {getFilteredLogs().length > 0 && (
+                
+                {/* CASE 1: NOT RETURNED (Unique 1-per-person currently OUT) */}
+                {viewMode === 'not-returned' ? (
                   <div>
-                    <h2 className="text-lg font-semibold mb-2 text-primary">Latest Access</h2>
-                    {renderLogCard(getFilteredLogs()[0], true)}
-                  </div>
-                )}
-
-                {/* Other logs */}
-                {getFilteredLogs().length > 1 && (
-                  <div>
-                    <h2 className="text-lg font-semibold mb-3 text-primary">Recent Activity</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {getFilteredLogs()
-                        .slice(1, 7)
-                        .map((log) => (
-                          <div key={log.id}>{renderLogCard(log)}</div>
+                    <h2 className="text-lg font-semibold mb-3 text-red-600 flex items-center gap-2">
+                      <LogOut className="h-5 w-5" />
+                      Students Currently Out ({notReturnedList.length})
+                    </h2>
+                    {notReturnedList.length === 0 ? (
+                      <p className="text-center py-10 text-gray-500 italic">Everyone is inside.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {notReturnedList.map((log) => (
+                          <div key={`unique-out-${log.studentId}`}>{renderLogCard(log)}</div>
                         ))}
-                    </div>
+                      </div>
+                    )}
+                  </div>
+                ) : viewMode === 'returned' ? (
+                  /* CASE 2: RETURNED (Unique 1-per-person currently IN) */
+                  <div>
+                    <h2 className="text-lg font-semibold mb-3 text-green-600 flex items-center gap-2">
+                      <LogIn className="h-5 w-5" />
+                      Students Currently Inside ({returnedList.length})
+                    </h2>
+                    {returnedList.length === 0 ? (
+                      <p className="text-center py-10 text-gray-500 italic">No students are currently inside.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {returnedList.map((log) => (
+                          <div key={`unique-in-${log.studentId}`}>{renderLogCard(log)}</div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* CASE 3: SHOW ALL LOGS (Full Historical Activity) */
+                  <div className="space-y-6">
+                    {getFilteredLogs().length === 0 ? (
+                      <div className="text-center py-10 text-gray-600">
+                        <Activity className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+                        <h3 className="text-lg font-semibold mb-1">No logs found</h3>
+                      </div>
+                    ) : (
+                      <>
+                        <div>
+                          <h2 className="text-lg font-semibold mb-2 text-primary">Latest Access</h2>
+                          {renderLogCard(getFilteredLogs()[0], true)}
+                        </div>
+                        {getFilteredLogs().length > 1 && (
+                          <div>
+                            <h2 className="text-lg font-semibold mb-3 text-primary">Recent Activity History</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {getFilteredLogs().slice(1, 10).map((log) => (
+                                <div key={log.id}>{renderLogCard(log)}</div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 )}
               </div>
