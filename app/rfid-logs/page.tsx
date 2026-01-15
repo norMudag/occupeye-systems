@@ -286,6 +286,14 @@ useEffect(() => {
         } catch (error) {
           console.error("Error fetching dorm data:", error);
         }
+      } else if (userData?.assignedBuilding) {
+        // Logged in as Student (Kiosk Mode)
+        dormNameFetched = userData.assignedBuilding;
+        setDormName(userData.assignedBuilding);
+      } else if (userData?.building) {
+        // Alternative field for Student dormitory
+        dormNameFetched = userData.building;
+        setDormName(userData.building);
       }
 
       // ✅ fetch ALL actions (entry + exit) so duration works
